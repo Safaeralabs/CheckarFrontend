@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
-  AlertTriangle, CheckCircle, Download, Phone, RefreshCw,
-  Users, ClipboardList, Car, Clock
+  AlertTriangle, CheckCircle, Download, DollarSign, Phone, RefreshCw,
+  Users, ClipboardList, Car, Clock,
 } from 'lucide-react'
 import { getDashboardSummary, getRTMVencimiento } from '../../api/administration'
 
@@ -191,10 +191,10 @@ export default function RTMDashboard() {
       </div>
 
       {/* Métricas */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         <MetricCard
           icon={ClipboardList}
-          label="Inspecciones totales"
+          label="Inspecciones"
           value={loadingSummary ? null : summary?.total_inspecciones ?? 0}
           sub={`${summary?.inspecciones_este_mes ?? 0} este mes`}
           color="brand"
@@ -218,6 +218,21 @@ export default function RTMDashboard() {
           value={loadingSummary ? null : summary?.rtm_vencen_30_dias ?? 0}
           sub="Próximos 30 días"
           color="danger"
+        />
+        <MetricCard
+          icon={DollarSign}
+          label="Ingresos hoy"
+          value={loadingSummary ? null : summary?.ingresos_hoy != null
+            ? `$${Number(summary.ingresos_hoy).toLocaleString('es-CO')}` : '$0'}
+          color="warning"
+        />
+        <MetricCard
+          icon={DollarSign}
+          label="Ingresos del mes"
+          value={loadingSummary ? null : summary?.ingresos_este_mes != null
+            ? `$${Number(summary.ingresos_este_mes).toLocaleString('es-CO')}` : '$0'}
+          sub="Acumulado"
+          color="success"
         />
       </div>
 
