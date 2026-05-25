@@ -83,7 +83,7 @@ export default function AdminLayout() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <NavLink to="/admin-panel/usuarios" className="text-muted hover:text-ink transition p-1" title="Usuarios">
+          <NavLink to="/admin-panel/usuarios" className="text-ink-2 hover:text-ink transition p-1" title="Usuarios">
             <Users className="w-4 h-4" />
           </NavLink>
           <NavLink to="/admin-panel/perfil" className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-xs font-bold text-white">
