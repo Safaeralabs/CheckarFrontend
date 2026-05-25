@@ -36,7 +36,7 @@ export default function CustomerLayout() {
       {/* Sidebar — desktop */}
       <aside className="hidden md:flex fixed top-0 left-0 bottom-0 w-60 bg-surface border-r border-border flex-col z-30">
         <div className="flex items-center px-5 py-4 border-b border-border">
-          <img src="/logo_blanco.png" alt="Checkar" className="h-8 w-auto" />
+          <img src="/logo_blanco.png" alt="Checkar" className="h-12 w-auto" />
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
@@ -67,7 +67,7 @@ export default function CustomerLayout() {
 
       {/* Header — mobile */}
       <header className="md:hidden sticky top-0 z-30 bg-surface border-b border-border flex items-center justify-between px-4 h-14">
-        <img src="/logo_blanco.png" alt="Checkar" className="h-7 w-auto" />
+        <img src="/logo_blanco.png" alt="Checkar" className="h-10 w-auto" />
         <div className="flex items-center gap-2">
           <NavLink to="/cliente/perfil" className="w-8 h-8 rounded-full bg-brand-soft flex items-center justify-center text-xs font-bold text-brand">
             {initials}

@@ -48,7 +48,7 @@ export default function Login() {
 
         <div className="relative">
           <div className="mb-12">
-            <img src="/logo_blanco.png" alt="Checkar" className="h-10 w-auto" />
+            <img src="/logo_blanco.png" alt="Checkar" className="h-14 w-auto" />
           </div>
           <h1 className="text-white text-3xl font-bold leading-tight mb-4">
             Tu inspección<br />técnico-mecánica<br />en línea.
@@ -79,7 +79,7 @@ export default function Login() {
         <div className="w-full max-w-sm">
           {/* Logo mobile */}
           <div className="lg:hidden mb-8">
-            <img src="/logo_blanco.png" alt="Checkar" className="h-8 w-auto" />
+            <img src="/logo_blanco.png" alt="Checkar" className="h-12 w-auto" />
           </div>
 
           <h2 className="text-2xl font-bold text-ink mb-1">Bienvenido</h2>
