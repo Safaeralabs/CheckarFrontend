@@ -25,7 +25,10 @@ export default function Login() {
     setApiError('')
     try {
       const user = await login(data)
-      navigate(user.role === 'customer' ? '/cliente' : '/operacion')
+      if (user.must_change_password) { navigate('/cambiar-contrasena'); return }
+      if (user.role === 'customer') navigate('/cliente')
+      else if (['supervisor', 'admin'].includes(user.role)) navigate('/admin-panel')
+      else navigate('/operacion')
     } catch (err) {
       setApiError(err.response?.data?.detail ?? 'Credenciales incorrectas')
     }

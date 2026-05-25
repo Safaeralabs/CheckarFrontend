@@ -9,3 +9,5 @@ export const updateUser = (id, data) => api.patch(`auth/users/${id}/`, data)
 
 export const resetPassword = (id, new_password) =>
   api.post(`auth/users/${id}/reset-password/`, { new_password })
+
+export const deleteUser = (id) => api.delete(`auth/users/${id}/`)

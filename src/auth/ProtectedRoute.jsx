@@ -12,8 +12,15 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />
 
+  if (user?.must_change_password) return <Navigate to="/cambiar-contrasena" replace />
+
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    const dest = user?.role === 'customer' ? '/cliente' : '/login'
+    const role = user?.role
+    const dest =
+      role === 'customer' ? '/cliente' :
+      ['supervisor', 'admin'].includes(role) ? '/admin-panel' :
+      role ? '/operacion' :
+      '/login'
     return <Navigate to={dest} replace />
   }
 

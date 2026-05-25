@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, KeyRound, Users, X } from 'lucide-react'
+import { Plus, Pencil, KeyRound, Users, X, Trash2 } from 'lucide-react'
 import * as usersApi from '../../api/users'
 
 const ROLES = [
   { value: 'operator',   label: 'Operador' },
-  { value: 'inspector',  label: 'Inspector' },
   { value: 'supervisor', label: 'Supervisor' },
   { value: 'admin',      label: 'Administrador' },
 ]
 
-const ROLE_FILTER = [{ value: '', label: 'Todos los roles' }, ...ROLES]
+const ROLE_FILTER = [{ value: '', label: 'Todos los roles' }, ...ROLES, { value: 'inspector', label: 'Inspector (legacy)' }]
 
 const roleBadge = {
   operator:   'bg-info-soft text-info',
@@ -21,15 +20,16 @@ const roleBadge = {
 
 const inp = "w-full px-3 py-2.5 rounded-lg border border-border bg-canvas text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-ink"
 const btn = "px-4 py-2 rounded-lg bg-accent hover:bg-accent-hover text-white font-semibold text-sm transition disabled:opacity-60"
+const btnDanger = "px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition disabled:opacity-60"
 const btnGhost = "px-4 py-2 rounded-lg border border-border text-ink-2 hover:bg-canvas text-sm transition"
 
-const EMPTY_FORM = { username: '', password: '', first_name: '', last_name: '', email: '', phone: '', document_number: '', role: 'operator' }
+const EMPTY_FORM = { username: '', first_name: '', last_name: '', email: '', phone: '', document_number: '', role: 'operator' }
 
 export default function Usuarios() {
   const qc = useQueryClient()
   const [roleFilter, setRoleFilter] = useState('')
   const [search, setSearch] = useState('')
-  const [modal, setModal] = useState(null) // null | { mode: 'create' } | { mode: 'edit', user } | { mode: 'password', user }
+  const [modal, setModal] = useState(null) // null | { mode: 'create' } | { mode: 'edit', user } | { mode: 'password', user } | { mode: 'delete', user }
   const [form, setForm] = useState(EMPTY_FORM)
   const [formError, setFormError] = useState('')
   const [newPass, setNewPass] = useState('')
@@ -68,6 +68,11 @@ export default function Usuarios() {
     },
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: (u) => usersApi.deleteUser(u.id),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['internal-users'] }); closeModal() },
+  })
+
   const toggleActive = useMutation({
     mutationFn: (u) => usersApi.updateUser(u.id, { is_active: !u.is_active }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['internal-users'] }),
@@ -78,13 +83,17 @@ export default function Usuarios() {
   }
 
   function openEdit(u) {
-    setForm({ username: u.username, password: '', first_name: u.first_name, last_name: u.last_name, email: u.email ?? '', phone: u.phone ?? '', document_number: u.document_number ?? '', role: u.role })
+    setForm({ username: u.username, first_name: u.first_name, last_name: u.last_name, email: u.email ?? '', phone: u.phone ?? '', document_number: u.document_number ?? '', role: u.role })
     setFormError('')
     setModal({ mode: 'edit', user: u })
   }
 
   function openPassword(u) {
     setNewPass(''); setPassError(''); setModal({ mode: 'password', user: u })
+  }
+
+  function openDelete(u) {
+    setModal({ mode: 'delete', user: u })
   }
 
   function closeModal() { setModal(null) }
@@ -94,7 +103,6 @@ export default function Usuarios() {
     setFormError('')
     const payload = { ...form }
     if (modal.mode === 'edit') delete payload.username
-    if (!payload.password) delete payload.password
     saveMutation.mutate(payload)
   }
 
@@ -108,7 +116,7 @@ export default function Usuarios() {
             <Users className="w-6 h-6 text-brand" />
             Usuarios internos
           </h1>
-          <p className="text-ink-2 text-sm">Operadores, inspectores, supervisores y administradores</p>
+          <p className="text-ink-2 text-sm">Operadores, supervisores y administradores</p>
         </div>
         <button onClick={openCreate} className={btn + ' flex items-center gap-2'}>
           <Plus className="w-4 h-4" /> Nuevo
@@ -180,6 +188,9 @@ export default function Usuarios() {
                       <button onClick={() => openPassword(u)} className="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-canvas transition" title="Resetear contraseña">
                         <KeyRound className="w-4 h-4" />
                       </button>
+                      <button onClick={() => openDelete(u)} className="p-1.5 rounded-lg text-muted hover:text-red-600 hover:bg-red-50 transition" title="Eliminar usuario">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -211,13 +222,11 @@ export default function Usuarios() {
                 {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
             </div>
-            <F
-              label={modal.mode === 'create' ? 'Contraseña' : 'Nueva contraseña (opcional)'}
-              type="password"
-              value={form.password}
-              onChange={v => setForm(p => ({ ...p, password: v }))}
-              required={modal.mode === 'create'}
-            />
+            {modal.mode === 'create' && (
+              <p className="text-xs text-muted bg-canvas border border-border rounded-lg px-3 py-2">
+                La contraseña temporal se generará automáticamente y se enviará al correo del usuario.
+              </p>
+            )}
             {formError && <p className="text-sm text-danger">{formError}</p>}
             <div className="flex justify-end gap-3 pt-1">
               <button type="button" onClick={closeModal} className={btnGhost}>Cancelar</button>
@@ -239,6 +248,31 @@ export default function Usuarios() {
               <button onClick={closeModal} className={btnGhost}>Cancelar</button>
               <button onClick={() => passMutation.mutate()} disabled={passMutation.isPending || newPass.length < 8} className={btn}>
                 {passMutation.isPending ? 'Guardando…' : 'Cambiar contraseña'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal confirmar eliminación */}
+      {modal?.mode === 'delete' && (
+        <Modal title="Eliminar usuario" onClose={closeModal}>
+          <div className="space-y-4">
+            <p className="text-sm text-ink">
+              ¿Estás seguro de que quieres eliminar a{' '}
+              <strong>{modal.user.first_name} {modal.user.last_name}</strong> (@{modal.user.username})?
+            </p>
+            <p className="text-xs text-danger bg-danger-soft border border-red-200 rounded-lg px-3 py-2">
+              Esta acción es irreversible y eliminará todos los datos asociados al usuario.
+            </p>
+            <div className="flex justify-end gap-3 pt-1">
+              <button onClick={closeModal} className={btnGhost}>Cancelar</button>
+              <button
+                onClick={() => deleteMutation.mutate(modal.user)}
+                disabled={deleteMutation.isPending}
+                className={btnDanger}
+              >
+                {deleteMutation.isPending ? 'Eliminando…' : 'Eliminar definitivamente'}
               </button>
             </div>
           </div>

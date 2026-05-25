@@ -25,6 +25,7 @@ import Reportes from './pages/admin/Reportes'
 import Bitacora from './pages/admin/Bitacora'
 import Usuarios from './pages/admin/Usuarios'
 import Perfil from './pages/shared/Perfil'
+import CambiarContrasena from './pages/shared/CambiarContrasena'
 
 const OPERATOR_ROLES = ['operator', 'inspector', 'supervisor', 'admin']
 const ADMIN_ROLES    = ['supervisor', 'admin']
@@ -46,9 +47,10 @@ function RoleRedirect() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/login"     element={<Login />} />
-      <Route path="/registro"  element={<Register />} />
-      <Route path="/registrar" element={<RegistroPublico />} />
+      <Route path="/login"            element={<Login />} />
+      <Route path="/registro"         element={<Register />} />
+      <Route path="/registrar"        element={<RegistroPublico />} />
+      <Route path="/cambiar-contrasena" element={<CambiarContrasena />} />
 
       {/* Portal Cliente */}
       <Route
