@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 
 const schema = z.object({
@@ -44,11 +44,8 @@ export default function Login() {
         <div className="absolute top-0 left-0 right-0 h-1 bg-brand" />
 
         <div className="relative">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="w-9 h-9 bg-accent rounded-lg flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-white font-bold text-xl tracking-tight">CHECKAR</span>
+          <div className="mb-12">
+            <img src="/logo_blanco.png" alt="Checkar" className="h-10 w-auto" />
           </div>
           <h1 className="text-white text-3xl font-bold leading-tight mb-4">
             Tu inspección<br />técnico-mecánica<br />en línea.
@@ -78,11 +75,8 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center p-6 bg-canvas">
         <div className="w-full max-w-sm">
           {/* Logo mobile */}
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-brand text-lg tracking-tight">CHECKAR</span>
+          <div className="lg:hidden mb-8">
+            <img src="/logo_blanco.png" alt="Checkar" className="h-8 w-auto" />
           </div>
 
           <h2 className="text-2xl font-bold text-ink mb-1">Bienvenido</h2>
