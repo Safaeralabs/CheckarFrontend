@@ -23,6 +23,7 @@ import AdminLayout from './pages/admin/AdminLayout'
 import RTMDashboard from './pages/admin/RTMDashboard'
 import Reportes from './pages/admin/Reportes'
 import Bitacora from './pages/admin/Bitacora'
+import Usuarios from './pages/admin/Usuarios'
 import Perfil from './pages/shared/Perfil'
 
 const OPERATOR_ROLES = ['operator', 'inspector', 'supervisor', 'admin']
@@ -98,6 +99,7 @@ export default function App() {
         <Route index                    element={<RTMDashboard />} />
         <Route path="reportes"          element={<Reportes />} />
         <Route path="bitacora"          element={<Bitacora />} />
+        <Route path="usuarios"          element={<Usuarios />} />
         <Route path="perfil"            element={<Perfil />} />
       </Route>
 

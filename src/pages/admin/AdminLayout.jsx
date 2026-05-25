@@ -1,12 +1,15 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { BarChart3, BookOpen, LogOut, ShieldCheck, TrendingUp } from 'lucide-react'
+import { BarChart3, BookOpen, LogOut, ShieldCheck, TrendingUp, Users } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
 
 const navItems = [
   { to: '/admin-panel',           icon: BarChart3,  label: 'RTM y alertas', end: true },
   { to: '/admin-panel/reportes',  icon: TrendingUp, label: 'Reportes',      end: false },
   { to: '/admin-panel/bitacora',  icon: BookOpen,   label: 'Bitácora',      end: false },
+  { to: '/admin-panel/usuarios',  icon: Users,      label: 'Usuarios',      end: false, hide: true },
 ]
+
+const bottomNav = navItems.filter(n => !n.hide)
 
 const linkClass = ({ isActive }) =>
   `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
@@ -95,7 +98,7 @@ export default function AdminLayout() {
 
       {/* Bottom nav mobile */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-border z-30 flex justify-around">
-        {navItems.map(({ to, icon: Icon, label, end }) => (
+        {bottomNav.map(({ to, icon: Icon, label, end }) => (
           <NavLink key={to} to={to} end={end} className={mobileClass}>
             <Icon className="w-5 h-5" />
             {label}
