@@ -573,14 +573,28 @@ export default function ReceptionForm() {
           )}
 
           {existingReception.signature_status === 'operator_signed' && (
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200">
-              <Clock className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-amber-800">Esperando firma del cliente</p>
-                <p className="text-xs text-amber-700 mt-0.5">
-                  Se envió una notificación al cliente. La inspección iniciará una vez firme desde su portal.
-                </p>
+            <div className="space-y-2">
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200">
+                <Clock className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-amber-800">Esperando firma del cliente</p>
+                  <p className="text-xs text-amber-700 mt-0.5">
+                    La inspección iniciará una vez que el cliente firme desde su portal.
+                  </p>
+                </div>
               </div>
+              {apt?.customer_detail && (
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-canvas border border-border">
+                  <Bell className="w-4 h-4 text-muted flex-shrink-0 mt-0.5" />
+                  <div className="text-xs text-ink-2 space-y-0.5">
+                    <p className="font-semibold text-ink">
+                      Notificación enviada a: {apt.customer_detail.first_name} {apt.customer_detail.last_name}
+                    </p>
+                    {apt.customer_detail.email && <p className="text-muted">{apt.customer_detail.email}</p>}
+                    {apt.customer_detail.phone && <p className="text-muted">{apt.customer_detail.phone}</p>}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

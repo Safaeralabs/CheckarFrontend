@@ -245,10 +245,24 @@ export default function WalkIn() {
               ))}
             </div>
 
-            {foundVehicle.owner_name && (
-              <div className="bg-canvas rounded-lg px-3 py-2 border border-border mb-4">
-                <p className="text-xs text-muted uppercase tracking-wide mb-0.5">Propietario registrado</p>
-                <p className="text-sm font-semibold text-ink">{foundVehicle.owner_name ?? '—'}</p>
+            {foundVehicle.owner_detail && (
+              <div className="bg-canvas rounded-lg px-3 py-2.5 border border-border mb-4 space-y-1">
+                <p className="text-xs text-muted uppercase tracking-wide font-semibold mb-1">Cliente asociado</p>
+                <p className="text-sm font-bold text-ink">
+                  {foundVehicle.owner_detail.first_name} {foundVehicle.owner_detail.last_name}
+                </p>
+                {foundVehicle.owner_detail.email && (
+                  <p className="text-xs text-muted flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                    {foundVehicle.owner_detail.email}
+                  </p>
+                )}
+                {foundVehicle.owner_detail.phone && (
+                  <p className="text-xs text-muted">📞 {foundVehicle.owner_detail.phone}</p>
+                )}
+                {foundVehicle.owner_detail.document_number && (
+                  <p className="text-xs text-muted">CC {foundVehicle.owner_detail.document_number}</p>
+                )}
               </div>
             )}
 
