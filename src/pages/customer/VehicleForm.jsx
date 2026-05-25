@@ -7,7 +7,7 @@ import { X } from 'lucide-react'
 import api from '../../api/client'
 
 const schema = z.object({
-  plate:            z.string().min(5, 'Mínimo 5 caracteres').max(10),
+  plate:            z.string().regex(/^[A-Za-z]{3}\d{3}$/, 'Formato inválido. Debe ser 3 letras y 3 dígitos (ej: ABC123)'),
   vehicle_type:     z.enum(['light', 'heavy', 'motorcycle']),
   vehicle_class:    z.string().optional().default(''),
   service_category: z.enum(['particular', 'commercial', 'public']),

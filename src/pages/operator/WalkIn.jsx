@@ -48,9 +48,15 @@ export default function WalkIn() {
   const setField = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   // ── Búsqueda por placa ────────────────────────────────────────────────────
+  const PLATE_RE = /^[A-Z]{3}\d{3}$/
+
   const handleSearch = async () => {
     const p = plate.trim().toUpperCase()
     if (!p) { setSearchError('Ingresa una placa.'); return }
+    if (!PLATE_RE.test(p)) {
+      setSearchError('Formato inválido. Debe ser 3 letras seguidas de 3 dígitos (ej: ABC123).')
+      return
+    }
     setSearchError('')
     setSearching(true)
     try {
@@ -65,8 +71,12 @@ export default function WalkIn() {
         setPlate(p)
         setPhase('not_found')
       }
-    } catch {
-      setSearchError('Error al consultar. Intenta de nuevo.')
+    } catch (err) {
+      const d = err.response?.data
+      setSearchError(
+        typeof d === 'string' ? d
+        : d?.detail ?? d?.plate?.[0] ?? 'Error al consultar. Intenta de nuevo.'
+      )
     } finally {
       setSearching(false)
     }

@@ -21,7 +21,7 @@ const schema = z.object({
   password:        z.string().min(8, 'Mínimo 8 caracteres'),
   confirm:         z.string(),
   // Paso 2 — vehículo
-  plate:        z.string().regex(/^[A-Za-z]{3}\d{2,3}$/, 'Formato: ABC123 o ABC12'),
+  plate:        z.string().regex(/^[A-Za-z]{3}\d{3}$/, 'Formato inválido. Debe ser 3 letras y 3 dígitos (ej: ABC123)'),
   brand:        z.string().min(1, 'Requerido'),
   model_line:   z.string().min(1, 'Requerido'),
   model_year:   z.coerce.number().min(1990, 'Año mínimo 1990').max(new Date().getFullYear() + 1, 'Año inválido'),
