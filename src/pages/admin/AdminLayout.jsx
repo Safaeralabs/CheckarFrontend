@@ -6,7 +6,7 @@ const navItems = [
   { to: '/admin-panel',           icon: BarChart3,  label: 'RTM y alertas', end: true },
   { to: '/admin-panel/reportes',  icon: TrendingUp, label: 'Reportes',      end: false },
   { to: '/admin-panel/bitacora',  icon: BookOpen,   label: 'Bitácora',      end: false },
-  { to: '/admin-panel/usuarios',  icon: Users,      label: 'Usuarios',      end: false, hide: true },
+  { to: '/admin-panel/usuarios',  icon: Users,      label: 'Usuarios',      end: false },
 ]
 
 const bottomNav = navItems.filter(n => !n.hide)
@@ -19,7 +19,7 @@ const linkClass = ({ isActive }) =>
   }`
 
 const mobileClass = ({ isActive }) =>
-  `flex flex-col items-center gap-1 pt-2 pb-1 px-5 text-xs font-medium transition-colors ${
+  `flex flex-col items-center gap-1 pt-2 pb-1 px-3 text-xs font-medium transition-colors ${
     isActive ? 'text-accent' : 'text-muted'
   }`
 
