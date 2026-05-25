@@ -36,7 +36,7 @@ export default function AdminLayout() {
       {/* Sidebar desktop */}
       <aside className="hidden md:flex fixed top-0 left-0 bottom-0 w-60 bg-surface border-r border-border flex-col z-30">
         <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
-          <img src="/logo_blanco.png" alt="Checkar" className="h-12 w-auto" />
+          <img src="/logo_blanco.png" alt="Checkar" className="h-20 w-auto" />
           <span className="text-xs text-muted">{roleLabel}</span>
         </div>
 
@@ -69,7 +69,7 @@ export default function AdminLayout() {
       {/* Header mobile */}
       <header className="md:hidden sticky top-0 z-30 bg-surface border-b border-border flex items-center justify-between px-4 h-14">
         <div className="flex items-center gap-2">
-          <img src="/logo_blanco.png" alt="Checkar" className="h-10 w-auto" />
+          <img src="/logo_blanco.png" alt="Checkar" className="h-16 w-auto" />
           <span className="text-muted text-xs">{roleLabel}</span>
         </div>
         <div className="flex items-center gap-2">
