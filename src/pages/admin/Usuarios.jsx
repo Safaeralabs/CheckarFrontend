@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, KeyRound, Users, X, Trash2 } from 'lucide-react'
+import { Plus, Pencil, KeyRound, Users, X, Trash2, Mail, Copy, Check } from 'lucide-react'
 import * as usersApi from '../../api/users'
 
 const ROLES = [
@@ -29,11 +29,12 @@ export default function Usuarios() {
   const qc = useQueryClient()
   const [roleFilter, setRoleFilter] = useState('')
   const [search, setSearch] = useState('')
-  const [modal, setModal] = useState(null) // null | { mode: 'create' } | { mode: 'edit', user } | { mode: 'password', user } | { mode: 'delete', user }
+  const [modal, setModal] = useState(null) // null | { mode: 'create' } | { mode: 'edit', user } | { mode: 'password', user } | { mode: 'delete', user } | { mode: 'resend', user, result }
   const [form, setForm] = useState(EMPTY_FORM)
   const [formError, setFormError] = useState('')
   const [newPass, setNewPass] = useState('')
   const [passError, setPassError] = useState('')
+  const [copied, setCopied] = useState(false)
 
   const { data, isLoading } = useQuery({
     queryKey: ['internal-users'],
@@ -73,6 +74,14 @@ export default function Usuarios() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['internal-users'] }); closeModal() },
   })
 
+  const resendMutation = useMutation({
+    mutationFn: (u) => usersApi.resendCredentials(u.id),
+    onSuccess: (res, u) => {
+      qc.invalidateQueries({ queryKey: ['internal-users'] })
+      setModal({ mode: 'resend', user: u, result: res.data })
+    },
+  })
+
   const toggleActive = useMutation({
     mutationFn: (u) => usersApi.updateUser(u.id, { is_active: !u.is_active }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['internal-users'] }),
@@ -96,7 +105,7 @@ export default function Usuarios() {
     setModal({ mode: 'delete', user: u })
   }
 
-  function closeModal() { setModal(null) }
+  function closeModal() { setModal(null); setCopied(false) }
 
   function handleSave(e) {
     e.preventDefault()
@@ -173,12 +182,19 @@ export default function Usuarios() {
                     </span>
                   </td>
                   <td className="px-5 py-3.5 hidden md:table-cell">
-                    <button
-                      onClick={() => toggleActive.mutate(u)}
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition ${u.is_active ? 'bg-success-soft text-success hover:opacity-70' : 'bg-danger-soft text-danger hover:opacity-70'}`}
-                    >
-                      {u.is_active ? 'Activo' : 'Inactivo'}
-                    </button>
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => toggleActive.mutate(u)}
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition ${u.is_active ? 'bg-success-soft text-success hover:opacity-70' : 'bg-danger-soft text-danger hover:opacity-70'}`}
+                      >
+                        {u.is_active ? 'Activo' : 'Inactivo'}
+                      </button>
+                      {u.must_change_password && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                          Pendiente primer login
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center justify-end gap-2">
@@ -187,6 +203,14 @@ export default function Usuarios() {
                       </button>
                       <button onClick={() => openPassword(u)} className="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-canvas transition" title="Resetear contraseña">
                         <KeyRound className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => resendMutation.mutate(u)}
+                        disabled={resendMutation.isPending}
+                        className="p-1.5 rounded-lg text-muted hover:text-amber-600 hover:bg-amber-50 transition"
+                        title="Reenviar credenciales"
+                      >
+                        <Mail className="w-4 h-4" />
                       </button>
                       <button onClick={() => openDelete(u)} className="p-1.5 rounded-lg text-muted hover:text-red-600 hover:bg-red-50 transition" title="Eliminar usuario">
                         <Trash2 className="w-4 h-4" />
@@ -249,6 +273,56 @@ export default function Usuarios() {
               <button onClick={() => passMutation.mutate()} disabled={passMutation.isPending || newPass.length < 8} className={btn}>
                 {passMutation.isPending ? 'Guardando…' : 'Cambiar contraseña'}
               </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal credenciales reenviadas */}
+      {modal?.mode === 'resend' && (
+        <Modal title={`Credenciales — ${modal.user.first_name}`} onClose={closeModal}>
+          <div className="space-y-4">
+            {modal.result?.email_sent ? (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-success-soft border border-green-200 text-xs text-success">
+                <Mail className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                Se enviaron las credenciales al correo <strong>{modal.user.email}</strong>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-700">
+                <Mail className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                No se pudo enviar el correo. Comparte estas credenciales manualmente.
+              </div>
+            )}
+            <div>
+              <p className="text-xs text-muted mb-1">Usuario</p>
+              <p className="font-mono text-sm font-semibold text-ink bg-canvas border border-border rounded-lg px-3 py-2">
+                {modal.result?.username}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted mb-1">Contraseña temporal</p>
+              <div className="flex items-center gap-2">
+                <p className="font-mono text-sm font-semibold text-ink bg-canvas border border-border rounded-lg px-3 py-2 flex-1">
+                  {modal.result?.password}
+                </p>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(modal.result?.password ?? '')
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 2000)
+                  }}
+                  className="p-2 rounded-lg border border-border hover:bg-canvas transition text-muted hover:text-ink"
+                  title="Copiar contraseña"
+                >
+                  {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-muted">
+              El usuario deberá cambiar esta contraseña en su primer inicio de sesión.
+            </p>
+            <div className="flex justify-end pt-1">
+              <button onClick={closeModal} className={btn}>Listo</button>
             </div>
           </div>
         </Modal>

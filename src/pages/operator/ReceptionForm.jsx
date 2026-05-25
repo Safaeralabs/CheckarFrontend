@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ArrowLeft, ArrowRight, Bell, Car, CheckCircle, Clock, Printer } from 'lucide-react'
 import api from '../../api/client'
+import { addDamagePhoto, removeDamagePhoto } from '../../api/operations'
 import SignaturePad from '../../components/SignaturePad'
 import DamageDiagram from '../../components/DamageDiagram'
 
@@ -424,7 +425,20 @@ export default function ReceptionForm() {
         {/* Esquema de daños visuales */}
         <section className="bg-surface rounded-xl border border-border p-5">
           <h2 className="text-xs font-bold text-muted uppercase tracking-widest mb-4">Esquema de daños</h2>
-          <DamageDiagram value={damageAnnotations} onChange={setDamageAnnotations} />
+          <DamageDiagram
+            value={damageAnnotations}
+            onChange={setDamageAnnotations}
+            receptionId={existingReception?.id ?? null}
+            photos={existingReception?.damage_photos ?? []}
+            onAddPhoto={async (damageId, photoBase64) => {
+              await addDamagePhoto(existingReception.id, { damage_id: damageId, photo_base64: photoBase64 })
+              qc.invalidateQueries({ queryKey: ['reception', appointmentId] })
+            }}
+            onRemovePhoto={async (photoId) => {
+              await removeDamagePhoto(existingReception.id, photoId)
+              qc.invalidateQueries({ queryKey: ['reception', appointmentId] })
+            }}
+          />
         </section>
 
         {/* Datos del conductor */}
