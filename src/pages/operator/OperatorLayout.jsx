@@ -6,8 +6,10 @@ const navItems = [
   { to: '/operacion',              icon: LayoutDashboard, label: 'Cola del día',   end: true },
   { to: '/operacion/walk-in',      icon: Zap,             label: 'Ingreso rápido', end: false },
   { to: '/operacion/inspecciones', icon: ClipboardList,   label: 'Inspecciones',   end: false },
-  { to: '/operacion/perfil',       icon: Settings,        label: 'Mi perfil',      end: false },
+  { to: '/operacion/perfil',       icon: Settings,        label: 'Mi perfil',      end: false, hide: true },
 ]
+
+const bottomNav = navItems.filter(n => !n.hide)
 
 const linkClass = ({ isActive }) =>
   `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
@@ -90,7 +92,7 @@ export default function OperatorLayout() {
 
       {/* Bottom nav mobile */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-border z-30 flex justify-around">
-        {navItems.map(({ to, icon: Icon, label, end }) => (
+        {bottomNav.map(({ to, icon: Icon, label, end }) => (
           <NavLink key={to} to={to} end={end} className={mobileClass}>
             <Icon className="w-5 h-5" />
             {label}
