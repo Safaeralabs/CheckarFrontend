@@ -1,15 +1,12 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { BarChart3, BookOpen, LogOut, Settings, ShieldCheck, TrendingUp } from 'lucide-react'
+import { BarChart3, BookOpen, LogOut, ShieldCheck, TrendingUp } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
 
 const navItems = [
   { to: '/admin-panel',           icon: BarChart3,  label: 'RTM y alertas', end: true },
   { to: '/admin-panel/reportes',  icon: TrendingUp, label: 'Reportes',      end: false },
   { to: '/admin-panel/bitacora',  icon: BookOpen,   label: 'Bitácora',      end: false },
-  { to: '/admin-panel/perfil',    icon: Settings,   label: 'Mi perfil',     end: false, hide: true },
 ]
-
-const bottomNav = navItems.filter(n => !n.hide)
 
 const linkClass = ({ isActive }) =>
   `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
@@ -54,15 +51,16 @@ export default function AdminLayout() {
           ))}
         </nav>
 
+        {/* Avatar → perfil | logout */}
         <div className="border-t border-border px-3 py-3">
           <div className="flex items-center gap-3 px-2 py-2">
-            <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+            <NavLink to="/admin-panel/perfil" className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-xs font-bold text-white flex-shrink-0 hover:ring-2 hover:ring-brand/40 transition">
               {initials}
-            </div>
-            <div className="flex-1 min-w-0">
+            </NavLink>
+            <NavLink to="/admin-panel/perfil" className="flex-1 min-w-0 hover:opacity-80 transition">
               <p className="text-sm font-semibold text-ink truncate">{user?.first_name} {user?.last_name}</p>
               <p className="text-xs text-muted truncate">{roleLabel}</p>
-            </div>
+            </NavLink>
             <button onClick={handleLogout} className="text-muted hover:text-danger transition" title="Cerrar sesión">
               <LogOut className="w-4 h-4" />
             </button>
@@ -81,9 +79,14 @@ export default function AdminLayout() {
             <span className="text-muted text-xs ml-1.5">{roleLabel}</span>
           </div>
         </div>
-        <button onClick={handleLogout} className="text-muted hover:text-danger transition p-2">
-          <LogOut className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          <NavLink to="/admin-panel/perfil" className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-xs font-bold text-white">
+            {initials}
+          </NavLink>
+          <button onClick={handleLogout} className="text-muted hover:text-danger transition p-1" title="Cerrar sesión">
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </header>
 
       <main className="md:ml-60 pb-24 md:pb-0 min-h-screen">
@@ -92,7 +95,7 @@ export default function AdminLayout() {
 
       {/* Bottom nav mobile */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-border z-30 flex justify-around">
-        {bottomNav.map(({ to, icon: Icon, label, end }) => (
+        {navItems.map(({ to, icon: Icon, label, end }) => (
           <NavLink key={to} to={to} end={end} className={mobileClass}>
             <Icon className="w-5 h-5" />
             {label}
