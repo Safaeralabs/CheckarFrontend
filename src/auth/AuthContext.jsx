@@ -48,8 +48,15 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  const updateUser = (updatedUser) => setUser(updatedUser)
+
+  const rotateToken = (newToken) => {
+    localStorage.setItem('checkar_token', newToken)
+    setToken(newToken)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, ready, login, register, logout, isAuthenticated: !!token && !!user }}>
+    <AuthContext.Provider value={{ user, ready, login, register, logout, updateUser, rotateToken, isAuthenticated: !!token && !!user }}>
       {children}
     </AuthContext.Provider>
   )

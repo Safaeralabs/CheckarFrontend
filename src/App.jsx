@@ -23,6 +23,7 @@ import AdminLayout from './pages/admin/AdminLayout'
 import RTMDashboard from './pages/admin/RTMDashboard'
 import Reportes from './pages/admin/Reportes'
 import Bitacora from './pages/admin/Bitacora'
+import Perfil from './pages/shared/Perfil'
 
 const OPERATOR_ROLES = ['operator', 'inspector', 'supervisor', 'admin']
 const ADMIN_ROLES    = ['supervisor', 'admin']
@@ -64,6 +65,7 @@ export default function App() {
         <Route path="inspecciones/:id" element={<InspectionDetail />} />
         <Route path="documentos"      element={<DocumentList />} />
         <Route path="firmar/:receptionId" element={<ClientSignature />} />
+        <Route path="perfil"              element={<Perfil />} />
       </Route>
 
       {/* Portal Operador / Inspector */}
@@ -81,6 +83,7 @@ export default function App() {
         <Route path="inspecciones"             element={<InspectionList />} />
         <Route path="inspecciones/:id"         element={<InspectionWizard />} />
         <Route path="fr25/:receptionId"        element={<FR25Print />} />
+        <Route path="perfil"                   element={<Perfil />} />
       </Route>
 
       {/* Portal Admin / Supervisor */}
@@ -95,6 +98,7 @@ export default function App() {
         <Route index                    element={<RTMDashboard />} />
         <Route path="reportes"          element={<Reportes />} />
         <Route path="bitacora"          element={<Bitacora />} />
+        <Route path="perfil"            element={<Perfil />} />
       </Route>
 
       <Route path="/" element={<RoleRedirect />} />

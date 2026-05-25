@@ -1,11 +1,12 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { BarChart3, BookOpen, LogOut, ShieldCheck, TrendingUp } from 'lucide-react'
+import { BarChart3, BookOpen, LogOut, Settings, ShieldCheck, TrendingUp } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
 
 const navItems = [
   { to: '/admin-panel',           icon: BarChart3,  label: 'RTM y alertas', end: true },
   { to: '/admin-panel/reportes',  icon: TrendingUp, label: 'Reportes',      end: false },
   { to: '/admin-panel/bitacora',  icon: BookOpen,   label: 'Bitácora',      end: false },
+  { to: '/admin-panel/perfil',    icon: Settings,   label: 'Mi perfil',     end: false },
 ]
 
 const linkClass = ({ isActive }) =>

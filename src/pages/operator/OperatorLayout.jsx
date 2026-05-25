@@ -1,11 +1,12 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { ClipboardList, LayoutDashboard, LogOut, ShieldCheck, Zap } from 'lucide-react'
+import { ClipboardList, LayoutDashboard, LogOut, Settings, ShieldCheck, Zap } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
 
 const navItems = [
   { to: '/operacion',              icon: LayoutDashboard, label: 'Cola del día',   end: true },
   { to: '/operacion/walk-in',      icon: Zap,             label: 'Ingreso rápido', end: false },
   { to: '/operacion/inspecciones', icon: ClipboardList,   label: 'Inspecciones',   end: false },
+  { to: '/operacion/perfil',       icon: Settings,        label: 'Mi perfil',      end: false },
 ]
 
 const linkClass = ({ isActive }) =>

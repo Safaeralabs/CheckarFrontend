@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Calendar, Car, FileText, Home, LogOut, Search, ShieldCheck, User } from 'lucide-react'
+import { Calendar, Car, FileText, Home, LogOut, Search, Settings, ShieldCheck, User } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { to: '/cliente/citas',     icon: Calendar, label: 'Citas' },
   { to: '/cliente/inspecciones/0', icon: Search, label: 'Inspección', hide: true },
   { to: '/cliente/documentos',icon: FileText, label: 'Documentos' },
+  { to: '/cliente/perfil',    icon: Settings, label: 'Mi perfil' },
 ]
 
 const bottomNav = navItems.filter(n => !n.hide)
