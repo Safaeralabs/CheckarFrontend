@@ -284,13 +284,21 @@ export default function ReceptionForm() {
           </div>
         </div>
         {existingReception && (
-          <Link
-            to={`/operacion/fr25/${existingReception.id}`}
-            target="_blank"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-sm text-muted hover:text-ink hover:border-brand/40 transition"
-          >
-            <Printer className="w-4 h-4" /> FR-25
-          </Link>
+          <div className="flex items-start gap-3">
+            {existingReception.turn_number && (
+              <div className="bg-accent-soft rounded-xl px-4 py-2 text-center">
+                <p className="text-[10px] text-accent font-semibold uppercase tracking-wide">Turno</p>
+                <p className="text-lg font-black text-accent font-mono tracking-widest">{existingReception.turn_number}</p>
+              </div>
+            )}
+            <Link
+              to={`/operacion/fr25/${existingReception.id}`}
+              target="_blank"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-sm text-muted hover:text-ink hover:border-brand/40 transition"
+            >
+              <Printer className="w-4 h-4" /> FR-25
+            </Link>
+          </div>
         )}
       </div>
 

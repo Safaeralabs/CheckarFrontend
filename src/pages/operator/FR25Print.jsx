@@ -182,6 +182,11 @@ export default function FR25Print() {
             <div style={{ fontWeight: 800, fontSize: 13 }}>FR-25</div>
             <div>FECHA: {FR25_TEMPLATE_DATE}</div>
             <div>VERSIÓN: 11</div>
+            {rec?.turn_number && (
+              <div style={{ marginTop: 4, fontSize: 14, fontWeight: 900, letterSpacing: 1 }}>
+                TURNO: {rec.turn_number}
+              </div>
+            )}
           </div>
         </div>
 

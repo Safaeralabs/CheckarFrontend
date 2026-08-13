@@ -88,12 +88,8 @@ export default function WalkIn() {
   const walkInMut = useMutation({
     mutationFn: (payload) => api.post('operations/walk-in/', payload),
     onSuccess: (res) => {
-      if (res.data.is_new_client) {
-        // Mostrar pantalla de confirmación con info de email antes de navegar
-        setCreatedResult(res.data)
-      } else {
-        navigate(`/operacion/recepcion/${res.data.appointment_id}`)
-      }
+      // Mostrar pantalla de confirmación con el número de turno antes de navegar
+      setCreatedResult(res.data)
     },
     onError: (err) => {
       setSubmitError(err.response?.data?.detail ?? 'Error al crear la inspección.')
@@ -125,9 +121,17 @@ export default function WalkIn() {
         <div className="rounded-2xl border-2 border-success bg-success-soft p-8 text-center space-y-4">
           <CheckCircle className="w-12 h-12 text-success mx-auto" />
           <div>
-            <h2 className="text-xl font-bold text-success">Cliente registrado</h2>
+            <h2 className="text-xl font-bold text-success">
+              {createdResult.is_new_client ? 'Cliente registrado' : 'Inspección iniciada'}
+            </h2>
             <p className="text-sm text-green-700 mt-1">{createdResult.owner_name}</p>
           </div>
+          {createdResult.turn_number && (
+            <div className="inline-block bg-white border-2 border-success rounded-2xl px-8 py-4">
+              <p className="text-xs text-muted font-semibold uppercase tracking-wide">Turno</p>
+              <p className="text-4xl font-black text-success tracking-widest font-mono">{createdResult.turn_number}</p>
+            </div>
+          )}
           {createdResult.owner_email && (
             <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-green-200">
               <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
@@ -136,11 +140,13 @@ export default function WalkIn() {
               </p>
             </div>
           )}
-          <div className="bg-white border border-green-200 rounded-lg px-4 py-3 text-left space-y-1">
-            <p className="text-xs text-muted font-semibold uppercase tracking-wide">Credenciales del cliente</p>
-            <p className="text-sm text-ink">Usuario: <span className="font-mono font-bold">{createdResult.owner_email?.split('@')[0] ?? '—'}</span></p>
-            <p className="text-xs text-muted">Contraseña inicial: número de documento</p>
-          </div>
+          {createdResult.is_new_client && (
+            <div className="bg-white border border-green-200 rounded-lg px-4 py-3 text-left space-y-1">
+              <p className="text-xs text-muted font-semibold uppercase tracking-wide">Credenciales del cliente</p>
+              <p className="text-sm text-ink">Usuario: <span className="font-mono font-bold">{createdResult.owner_email?.split('@')[0] ?? '—'}</span></p>
+              <p className="text-xs text-muted">Contraseña inicial: número de documento</p>
+            </div>
+          )}
           <button
             onClick={() => navigate(`/operacion/recepcion/${createdResult.appointment_id}`)}
             className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-accent hover:bg-accent-hover text-white font-bold text-sm transition"
