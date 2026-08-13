@@ -34,7 +34,7 @@ const schema = z.object({
   objects_in_vehicle:       z.boolean().default(false),
   notes:                    z.string().optional().default(''),
   // Datos del vehículo (se envían por separado a PATCH vehicles/{id}/)
-  veh_service_category:     z.enum(['particular', 'commercial', 'public']).default('particular'),
+  veh_service_category:     z.enum(['particular', 'commercial', 'public', 'official', 'teaching']).default('particular'),
   veh_vehicle_class:        z.string().optional().default(''),
   veh_num_axes:             z.coerce.number().int().min(1).max(10).default(2),
   veh_mileage:              z.coerce.number().int().min(0).default(0),
@@ -345,8 +345,10 @@ export default function ReceptionForm() {
             <Field label="Servicio" half>
               <select {...register('veh_service_category')} className={sel}>
                 <option value="particular">Particular</option>
-                <option value="commercial">Comercial</option>
                 <option value="public">Público</option>
+                <option value="official">Oficial</option>
+                <option value="teaching">Enseñanza</option>
+                <option value="commercial">Comercial</option>
               </select>
             </Field>
 

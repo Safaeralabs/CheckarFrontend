@@ -2,10 +2,11 @@ import { useRef, useState } from 'react'
 import { Camera, Trash2, X } from 'lucide-react'
 
 const DAMAGE_TYPES = [
-  { id: 'rayado',   label: 'Rayado',  symbol: '—', color: '#f59e0b', bg: '#fef3c7' },
-  { id: 'golpe',    label: 'Golpe',   symbol: 'X', color: '#ef4444', bg: '#fee2e2' },
-  { id: 'mancha',   label: 'Mancha',  symbol: 'O', color: '#f97316', bg: '#ffedd5' },
-  { id: 'partido',  label: 'Partido', symbol: '?', color: '#8b5cf6', bg: '#ede9fe' },
+  { id: 'rayado',   label: 'Rayado',   symbol: '—',   color: '#f59e0b', bg: '#fef3c7' },
+  { id: 'golpe',    label: 'Golpe',    symbol: 'X',   color: '#ef4444', bg: '#fee2e2' },
+  { id: 'mancha',   label: 'Mancha',   symbol: 'O',   color: '#f97316', bg: '#ffedd5' },
+  { id: 'partido',  label: 'Partido',  symbol: '?',   color: '#8b5cf6', bg: '#ede9fe' },
+  { id: 'presion',  label: 'Presión',  symbol: 'psi', color: '#0ea5e9', bg: '#e0f2fe' },
 ]
 
 // SVG top-down car silhouette — viewBox 0 0 200 380
@@ -44,8 +45,8 @@ function DamageMarker({ mark, onRemove }) {
     <g style={{ cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); onRemove(mark.id) }}>
       <circle cx={mark.x} cy={mark.y} r="11" fill={dt.bg} stroke={dt.color} strokeWidth="1.5"/>
       <text
-        x={mark.x} y={mark.y + 4}
-        textAnchor="middle" fontSize="10" fontWeight="700" fill={dt.color}
+        x={mark.x} y={mark.y + 3}
+        textAnchor="middle" fontSize={dt.symbol.length > 1 ? 6.5 : 10} fontWeight="700" fill={dt.color}
         style={{ pointerEvents: 'none', userSelect: 'none' }}
       >
         {dt.symbol}

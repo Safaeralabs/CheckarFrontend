@@ -10,7 +10,7 @@ const schema = z.object({
   plate:            z.string().regex(/^[A-Za-z]{3}\d{3}$/, 'Formato inválido. Debe ser 3 letras y 3 dígitos (ej: ABC123)'),
   vehicle_type:     z.enum(['light', 'heavy', 'motorcycle']),
   vehicle_class:    z.string().optional().default(''),
-  service_category: z.enum(['particular', 'commercial', 'public']),
+  service_category: z.enum(['particular', 'commercial', 'public', 'official', 'teaching']),
   brand:            z.string().min(1, 'Requerido'),
   model_line:       z.string().min(1, 'Requerido'),
   model_year:       z.coerce.number().min(1900).max(new Date().getFullYear() + 1),
@@ -120,8 +120,10 @@ export default function VehicleForm({ vehicle, onSuccess, onCancel }) {
                 <Field label="Servicio" error={errors.service_category?.message} half>
                   <select {...register('service_category')} className={sel}>
                     <option value="particular">Particular</option>
-                    <option value="commercial">Comercial</option>
                     <option value="public">Público</option>
+                    <option value="official">Oficial</option>
+                    <option value="teaching">Enseñanza</option>
+                    <option value="commercial">Comercial</option>
                   </select>
                 </Field>
               </div>
