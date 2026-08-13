@@ -88,12 +88,8 @@ export default function WalkIn() {
   const walkInMut = useMutation({
     mutationFn: (payload) => api.post('operations/walk-in/', payload),
     onSuccess: (res) => {
-      if (res.data.is_new_client) {
-        // Mostrar pantalla de confirmación con info de email antes de navegar
-        setCreatedResult(res.data)
-      } else {
-        navigate(`/operacion/recepcion/${res.data.appointment_id}`)
-      }
+      // Mostrar pantalla de confirmación con el número de turno antes de navegar
+      setCreatedResult(res.data)
     },
     onError: (err) => {
       setSubmitError(err.response?.data?.detail ?? 'Error al crear la inspección.')
@@ -125,9 +121,17 @@ export default function WalkIn() {
         <div className="rounded-2xl border-2 border-success bg-success-soft p-8 text-center space-y-4">
           <CheckCircle className="w-12 h-12 text-success mx-auto" />
           <div>
-            <h2 className="text-xl font-bold text-success">Cliente registrado</h2>
+            <h2 className="text-xl font-bold text-success">
+              {createdResult.is_new_client ? 'Cliente registrado' : 'Inspección iniciada'}
+            </h2>
             <p className="text-sm text-green-700 mt-1">{createdResult.owner_name}</p>
           </div>
+          {createdResult.turn_number && (
+            <div className="inline-block bg-white border-2 border-success rounded-2xl px-8 py-4">
+              <p className="text-xs text-muted font-semibold uppercase tracking-wide">Turno</p>
+              <p className="text-4xl font-black text-success tracking-widest font-mono">{createdResult.turn_number}</p>
+            </div>
+          )}
           {createdResult.owner_email && (
             <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-green-200">
               <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
@@ -328,7 +332,7 @@ export default function WalkIn() {
                 <Field label="Email *" error={!form.email && submitError ? '' : undefined}>
                   <input value={form.email} onChange={e => setField('email', e.target.value)}
                     type="email" required placeholder="juan@correo.com" className={inp} />
-                  <p className="mt-1 text-xs text-muted">Se enviarán las credenciales de acceso al portal</p>
+                  <p className="mt-1 text-xs text-muted">Se usará para enviarle recordatorios y comunicaciones del CDA</p>
                 </Field>
               </div>
             </div>
