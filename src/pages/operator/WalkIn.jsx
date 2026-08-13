@@ -132,15 +132,10 @@ export default function WalkIn() {
             <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-green-200">
               <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
               <p className="text-sm text-green-800">
-                Credenciales enviadas a <strong>{createdResult.owner_email}</strong>
+                Correo de contacto registrado: <strong>{createdResult.owner_email}</strong>
               </p>
             </div>
           )}
-          <div className="bg-white border border-green-200 rounded-lg px-4 py-3 text-left space-y-1">
-            <p className="text-xs text-muted font-semibold uppercase tracking-wide">Credenciales del cliente</p>
-            <p className="text-sm text-ink">Usuario: <span className="font-mono font-bold">{createdResult.owner_email?.split('@')[0] ?? '—'}</span></p>
-            <p className="text-xs text-muted">Contraseña inicial: número de documento</p>
-          </div>
           <button
             onClick={() => navigate(`/operacion/recepcion/${createdResult.appointment_id}`)}
             className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-accent hover:bg-accent-hover text-white font-bold text-sm transition"

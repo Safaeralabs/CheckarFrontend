@@ -3,16 +3,6 @@ import { useAuth } from './auth/AuthContext'
 import ProtectedRoute from './auth/ProtectedRoute'
 import { getRoleHome } from './auth/roleHome'
 import Login from './pages/Login'
-import Register from './pages/Register'
-import RegistroPublico from './pages/RegistroPublico'
-import CustomerLayout from './pages/customer/CustomerLayout'
-import Dashboard from './pages/customer/Dashboard'
-import VehicleList from './pages/customer/VehicleList'
-import AppointmentNew from './pages/customer/AppointmentNew'
-import AppointmentList from './pages/customer/AppointmentList'
-import InspectionDetail from './pages/customer/InspectionDetail'
-import DocumentList from './pages/customer/DocumentList'
-import ClientSignature from './pages/customer/ClientSignature'
 import OperatorLayout from './pages/operator/OperatorLayout'
 import OperatorDashboard from './pages/operator/OperatorDashboard'
 import ReceptionForm from './pages/operator/ReceptionForm'
@@ -47,28 +37,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login"            element={<Login />} />
-      <Route path="/registro"         element={<Register />} />
-      <Route path="/registrar"        element={<RegistroPublico />} />
       <Route path="/cambiar-contrasena" element={<CambiarContrasena />} />
-
-      {/* Portal Cliente */}
-      <Route
-        path="/cliente"
-        element={
-          <ProtectedRoute allowedRoles={['customer']}>
-            <CustomerLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index                  element={<Dashboard />} />
-        <Route path="vehiculos"       element={<VehicleList />} />
-        <Route path="citas"           element={<AppointmentList />} />
-        <Route path="citas/nueva"     element={<AppointmentNew />} />
-        <Route path="inspecciones/:id" element={<InspectionDetail />} />
-        <Route path="documentos"      element={<DocumentList />} />
-        <Route path="firmar/:receptionId" element={<ClientSignature />} />
-        <Route path="perfil"              element={<Perfil />} />
-      </Route>
 
       {/* Portal Operador / Inspector */}
       <Route

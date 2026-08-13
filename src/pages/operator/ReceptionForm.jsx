@@ -4,11 +4,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ArrowLeft, ArrowRight, Bell, Car, CheckCircle, Clock, Printer } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Car, CheckCircle, Printer } from 'lucide-react'
 import api from '../../api/client'
 import { addDamagePhoto, removeDamagePhoto } from '../../api/operations'
 import SignaturePad from '../../components/SignaturePad'
 import DamageDiagram from '../../components/DamageDiagram'
+import { useAuth } from '../../auth/AuthContext'
 
 const schema = z.object({
   // Inspección
@@ -100,19 +101,18 @@ const VEHICLE_CLASS_LABELS = {
 const VEHICLE_TYPE_LABELS = { light: 'Liviano', heavy: 'Pesado', motorcycle: 'Motocicleta' }
 const FUEL_LABELS = { gasoline: 'Gasolina', diesel: 'Diésel', hybrid: 'Híbrido', electric: 'Eléctrico', gas: 'Gas' }
 
-const SIG_STATUS = {
-  unsigned:        { label: 'Sin firmas',               color: 'bg-gray-100 text-gray-600 border-gray-200' },
-  operator_signed: { label: 'Firmado — esperando cliente', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  fully_signed:    { label: 'Firmado por ambos',         color: 'bg-green-50 text-green-700 border-green-200' },
-}
-
 export default function ReceptionForm() {
   const { appointmentId } = useParams()
   const qc = useQueryClient()
+  const { user } = useAuth()
+  // El rol "operador" es quien entrega el vehículo al cliente: puede ver la
+  // recepción pero no modificarla. Solo inspector/supervisor/admin la editan.
+  const readOnly = user?.role === 'operator'
 
   const officerSigRef = useRef(null)
+  const clientSigRef = useRef(null)
   const [damageAnnotations, setDamageAnnotations] = useState([])
-  const [reqSigError, setReqSigError] = useState('')
+  const [sigError, setSigError] = useState('')
 
   const { data: apt, isLoading: loadApt } = useQuery({
     queryKey: ['appointment', appointmentId],
@@ -218,13 +218,17 @@ export default function ReceptionForm() {
         tapete: inv_tapete, herramientas: inv_herramientas, parlantes: inv_parlantes,
         num_sillas: inv_num_sillas, otros: inv_otros,
       }
+      // Ambas firmas se capturan en persona al momento de la recepción
       const signature_officer = officerSigRef.current?.toDataURL() ?? ''
+      const signature_client  = clientSigRef.current?.toDataURL() ?? ''
       const fullPayload = {
         ...receptionData,
         inspection_cost:    inspection_cost || null,
         inventory,
         damage_annotations: damageAnnotations,
         signature_officer,
+        signature_client,
+        signature_status: signature_officer && signature_client ? 'fully_signed' : 'unsigned',
       }
 
       // POST / PATCH recepción
@@ -239,17 +243,6 @@ export default function ReceptionForm() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['reception', appointmentId] })
-    },
-  })
-
-  const requestSigMut = useMutation({
-    mutationFn: () => api.post(`operations/receptions/${existingReception.id}/request_signature/`),
-    onSuccess: () => {
-      setReqSigError('')
-      qc.invalidateQueries({ queryKey: ['reception', appointmentId] })
-    },
-    onError: (err) => {
-      setReqSigError(err.response?.data?.detail ?? 'Error al solicitar firma.')
     },
   })
 
@@ -294,7 +287,24 @@ export default function ReceptionForm() {
         )}
       </div>
 
-      <form onSubmit={handleSubmit(d => saveMut.mutate(d))} className="space-y-8">
+      {readOnly && (
+        <div className="mb-6 px-4 py-3 rounded-lg bg-info-soft border border-info/30 text-info text-sm font-medium">
+          Modo de solo lectura — como operador podés ver la recepción, pero solo un inspector, supervisor o admin puede modificarla.
+        </div>
+      )}
+
+      <form
+        onSubmit={handleSubmit(d => {
+          if (officerSigRef.current?.isEmpty() || clientSigRef.current?.isEmpty()) {
+            setSigError('Se requieren ambas firmas — del funcionario y del cliente — para guardar la recepción.')
+            return
+          }
+          setSigError('')
+          saveMut.mutate(d)
+        })}
+        className="space-y-8"
+      >
+      <fieldset disabled={readOnly} className="space-y-8 border-0 p-0 m-0 min-w-0">
 
         {/* Tipo de inspección */}
         <section className="bg-surface rounded-xl border border-border p-5">
@@ -426,6 +436,7 @@ export default function ReceptionForm() {
           <DamageDiagram
             value={damageAnnotations}
             onChange={setDamageAnnotations}
+            readOnly={readOnly}
             receptionId={existingReception?.id ?? null}
             photos={existingReception?.damage_photos ?? []}
             onAddPhoto={async (damageId, photoBase64) => {
@@ -518,14 +529,23 @@ export default function ReceptionForm() {
           />
         </section>
 
-        {/* Firma del operador */}
+        {/* Firmas — ambas se toman en persona al momento de la recepción */}
         <section className="bg-surface rounded-xl border border-border p-5">
-          <h2 className="text-xs font-bold text-muted uppercase tracking-widest mb-2">Firma del operador</h2>
+          <h2 className="text-xs font-bold text-muted uppercase tracking-widest mb-2">Firmas</h2>
           <p className="text-xs text-muted mb-5">
-            El funcionario firma primero. Luego se solicita la firma del cliente desde su portal.
+            El funcionario y el cliente firman juntos, en el mismo momento de la recepción.
           </p>
-          <SignaturePad ref={officerSigRef} label="Funcionario del CDA" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <SignaturePad ref={officerSigRef} label="Funcionario del CDA" disabled={readOnly} />
+            <SignaturePad ref={clientSigRef} label="Cliente (Firma Autorizada)" disabled={readOnly} />
+          </div>
         </section>
+
+        {sigError && (
+          <div className="px-4 py-3 rounded-lg bg-danger-soft border border-red-200 text-danger text-sm">
+            {sigError}
+          </div>
+        )}
 
         {saveMut.isError && (
           <div className="px-4 py-3 rounded-lg bg-danger-soft border border-red-200 text-danger text-sm">
@@ -540,74 +560,20 @@ export default function ReceptionForm() {
         >
           {saveMut.isPending ? 'Guardando...' : existingReception ? 'Guardar cambios' : 'Guardar recepción'}
         </button>
+      </fieldset>
       </form>
 
-      {/* Flujo de firmas — solo visible cuando ya hay recepción guardada */}
-      {existingReception && (
-        <div className="mt-6 bg-surface rounded-xl border border-border p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold text-muted uppercase tracking-widest">Estado de firmas</h2>
-            {(() => {
-              const s = SIG_STATUS[existingReception.signature_status] ?? SIG_STATUS.unsigned
-              return <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${s.color}`}>{s.label}</span>
-            })()}
-          </div>
-
-          {existingReception.signature_status === 'unsigned' && (
+      {/* Una vez firmada por ambas partes, se habilita el paso a inspección */}
+      {existingReception?.signature_status === 'fully_signed' && (
+        <div className="mt-6 bg-surface rounded-xl border border-border p-5 space-y-3">
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-green-50 border border-green-200">
+            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs text-muted mb-3">
-                Una vez guardada la firma del operador, solicita la firma del cliente para habilitar la inspección.
-              </p>
-              <button
-                onClick={() => { setReqSigError(''); requestSigMut.mutate() }}
-                disabled={requestSigMut.isPending}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold transition disabled:opacity-60"
-              >
-                <Bell className="w-4 h-4" />
-                {requestSigMut.isPending ? 'Enviando...' : 'Solicitar firma del cliente'}
-              </button>
-              {reqSigError && <p className="mt-2 text-xs text-danger">{reqSigError}</p>}
+              <p className="text-sm font-semibold text-green-800">Recepción firmada por ambas partes</p>
+              <p className="text-xs text-green-700 mt-0.5">La inspección ya puede comenzar.</p>
             </div>
-          )}
-
-          {existingReception.signature_status === 'operator_signed' && (
-            <div className="space-y-2">
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200">
-                <Clock className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-amber-800">Esperando firma del cliente</p>
-                  <p className="text-xs text-amber-700 mt-0.5">
-                    La inspección iniciará una vez que el cliente firme desde su portal.
-                  </p>
-                </div>
-              </div>
-              {apt?.customer_detail && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-canvas border border-border">
-                  <Bell className="w-4 h-4 text-muted flex-shrink-0 mt-0.5" />
-                  <div className="text-xs text-ink-2 space-y-0.5">
-                    <p className="font-semibold text-ink">
-                      Notificación enviada a: {apt.customer_detail.first_name} {apt.customer_detail.last_name}
-                    </p>
-                    {apt.customer_detail.email && <p className="text-muted">{apt.customer_detail.email}</p>}
-                    {apt.customer_detail.phone && <p className="text-muted">{apt.customer_detail.phone}</p>}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {existingReception.signature_status === 'fully_signed' && (
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-green-50 border border-green-200">
-                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-green-800">Recepción firmada por ambas partes</p>
-                  <p className="text-xs text-green-700 mt-0.5">La inspección ya puede comenzar.</p>
-                </div>
-              </div>
-              <InspectionLink appointmentId={appointmentId} />
-            </div>
-          )}
+          </div>
+          <InspectionLink appointmentId={appointmentId} />
         </div>
       )}
     </div>
