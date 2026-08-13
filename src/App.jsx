@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth/AuthContext'
 import ProtectedRoute from './auth/ProtectedRoute'
+import { getRoleHome } from './auth/roleHome'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import RegistroPublico from './pages/RegistroPublico'
@@ -23,6 +24,7 @@ import AdminLayout from './pages/admin/AdminLayout'
 import RTMDashboard from './pages/admin/RTMDashboard'
 import Reportes from './pages/admin/Reportes'
 import Bitacora from './pages/admin/Bitacora'
+import Campaigns from './pages/admin/Campaigns'
 import Usuarios from './pages/admin/Usuarios'
 import Perfil from './pages/shared/Perfil'
 import CambiarContrasena from './pages/shared/CambiarContrasena'
@@ -38,10 +40,7 @@ function RoleRedirect() {
     </div>
   )
   if (!user) return <Navigate to="/login" replace />
-  if (user.role === 'customer') return <Navigate to="/cliente" replace />
-  if (ADMIN_ROLES.includes(user.role)) return <Navigate to="/admin-panel" replace />
-  if (OPERATOR_ROLES.includes(user.role)) return <Navigate to="/operacion" replace />
-  return <Navigate to="/login" replace />
+  return <Navigate to={getRoleHome(user.role)} replace />
 }
 
 export default function App() {
@@ -100,13 +99,14 @@ export default function App() {
       >
         <Route index                    element={<RTMDashboard />} />
         <Route path="reportes"          element={<Reportes />} />
+        <Route path="campanas"          element={<Campaigns />} />
         <Route path="bitacora"          element={<Bitacora />} />
         <Route path="usuarios"          element={<Usuarios />} />
         <Route path="perfil"            element={<Perfil />} />
       </Route>
 
       <Route path="/" element={<RoleRedirect />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

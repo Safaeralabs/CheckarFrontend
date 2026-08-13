@@ -20,7 +20,6 @@ const schema = z.object({
   engine_number:    z.string().optional().default(''),
   mileage:          z.coerce.number().min(0).default(0),
   num_axes:         z.coerce.number().min(1).max(10).default(2),
-  displacement:     z.coerce.number().optional().nullable(),
   tinted_windows:   z.boolean().default(false),
   armored:          z.boolean().default(false),
   non_functional:   z.boolean().default(false),
@@ -73,7 +72,6 @@ export default function VehicleForm({ vehicle, onSuccess, onCancel }) {
 
   const onSubmit = (data) => {
     data.plate = data.plate.toUpperCase()
-    if (!data.displacement) delete data.displacement
     mutation.mutate(data)
   }
 
@@ -169,12 +167,13 @@ export default function VehicleForm({ vehicle, onSuccess, onCancel }) {
                 </Field>
                 <Field label="Kilometraje" error={errors.mileage?.message} half>
                   <input {...register('mileage')} type="number" placeholder="0" className={inp} />
+                  <label className="mt-1.5 flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" className="w-4 h-4 rounded border-border accent-accent" {...register('non_functional')} />
+                    <span className="text-xs text-ink-2">Kilometraje no funcional</span>
+                  </label>
                 </Field>
                 <Field label="Ejes" error={errors.num_axes?.message} half>
                   <input {...register('num_axes')} type="number" min={1} max={10} className={inp} />
-                </Field>
-                <Field label="Cilindraje (cc)" half>
-                  <input {...register('displacement')} type="number" placeholder="Opcional" className={inp} />
                 </Field>
               </div>
             </section>
@@ -185,7 +184,6 @@ export default function VehicleForm({ vehicle, onSuccess, onCancel }) {
               <div className="space-y-3">
                 <Check label="Vidrios polarizados" {...register('tinted_windows')} />
                 <Check label="Vehículo blindado" {...register('armored')} />
-                <Check label="No funcional" {...register('non_functional')} />
               </div>
             </section>
           </div>

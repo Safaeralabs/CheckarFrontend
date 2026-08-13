@@ -39,7 +39,6 @@ const schema = z.object({
   veh_num_axes:             z.coerce.number().int().min(1).max(10).default(2),
   veh_mileage:              z.coerce.number().int().min(0).default(0),
   veh_num_passengers:       z.coerce.number().int().min(1).optional().or(z.literal('')),
-  veh_displacement:         z.coerce.number().int().min(0).optional().or(z.literal('')),
   veh_non_functional:       z.boolean().default(false),
   veh_tinted_windows:       z.boolean().default(false),
   veh_armored:              z.boolean().default(false),
@@ -178,7 +177,6 @@ export default function ReceptionForm() {
     setValue('veh_num_axes', vehicle.num_axes ?? 2)
     setValue('veh_mileage', vehicle.mileage ?? 0)
     setValue('veh_num_passengers', vehicle.num_passengers ?? '')
-    setValue('veh_displacement', vehicle.displacement ?? '')
     setValue('veh_non_functional', vehicle.non_functional ?? false)
     setValue('veh_tinted_windows', vehicle.tinted_windows ?? false)
     setValue('veh_armored', vehicle.armored ?? false)
@@ -190,7 +188,7 @@ export default function ReceptionForm() {
       // Separar campos del vehículo y del inventario
       const {
         veh_service_category, veh_vehicle_class, veh_num_axes, veh_mileage,
-        veh_num_passengers, veh_displacement, veh_non_functional, veh_tinted_windows, veh_armored,
+        veh_num_passengers, veh_non_functional, veh_tinted_windows, veh_armored,
         veh_registration_city,
         inv_llavero, inv_equipo_carretera, inv_encendedor, inv_radio, inv_extintor,
         inv_tapete, inv_herramientas, inv_parlantes, inv_num_sillas, inv_otros,
@@ -206,7 +204,6 @@ export default function ReceptionForm() {
           num_axes:          veh_num_axes,
           mileage:           veh_mileage,
           num_passengers:    veh_num_passengers || null,
-          displacement:      veh_displacement || null,
           non_functional:    veh_non_functional,
           tinted_windows:    veh_tinted_windows,
           armored:           veh_armored,
@@ -379,10 +376,10 @@ export default function ReceptionForm() {
 
             <Field label="Kilometraje" half error={errors.veh_mileage?.message}>
               <input {...register('veh_mileage')} type="number" min="0" placeholder="88000" className={inpSm} />
-            </Field>
-
-            <Field label="Cilindraje (cc)" half>
-              <input {...register('veh_displacement')} type="number" min="0" placeholder="1600" className={inpSm} />
+              <label className="mt-1.5 flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="w-4 h-4 rounded border-border accent-accent" {...register('veh_non_functional')} />
+                <span className="text-xs text-ink-2">Kilometraje no funcional</span>
+              </label>
             </Field>
 
             <Field label="Ciudad de matrícula">
@@ -393,7 +390,6 @@ export default function ReceptionForm() {
           <div className="mt-3 divide-y divide-border">
             <CheckRow label="Uso de vidrios polarizados" {...register('veh_tinted_windows')} />
             <CheckRow label="Vehículo blindado"          {...register('veh_armored')} />
-            <CheckRow label="No funcional"               {...register('veh_non_functional')} />
           </div>
         </section>
 
