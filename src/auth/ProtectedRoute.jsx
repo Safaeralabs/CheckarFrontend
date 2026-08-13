@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from './AuthContext'
+import { getRoleHome } from './roleHome'
 
 export default function ProtectedRoute({ children, allowedRoles }) {
   const { user, ready, isAuthenticated } = useAuth()
@@ -15,13 +16,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
   if (user?.must_change_password) return <Navigate to="/cambiar-contrasena" replace />
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    const role = user?.role
-    const dest =
-      role === 'customer' ? '/cliente' :
-      ['supervisor', 'admin'].includes(role) ? '/admin-panel' :
-      role ? '/operacion' :
-      '/login'
-    return <Navigate to={dest} replace />
+    return <Navigate to={getRoleHome(user?.role)} replace />
   }
 
   return children
