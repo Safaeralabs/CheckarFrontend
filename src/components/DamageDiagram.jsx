@@ -38,11 +38,14 @@ function CarSVG() {
   )
 }
 
-function DamageMarker({ mark, onRemove }) {
+function DamageMarker({ mark, onRemove, readOnly }) {
   const dt = DAMAGE_TYPES.find(d => d.id === mark.type)
   if (!dt) return null
   return (
-    <g style={{ cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); onRemove(mark.id) }}>
+    <g
+      style={{ cursor: readOnly ? 'default' : 'pointer' }}
+      onClick={(e) => { e.stopPropagation(); if (!readOnly) onRemove(mark.id) }}
+    >
       <circle cx={mark.x} cy={mark.y} r="11" fill={dt.bg} stroke={dt.color} strokeWidth="1.5"/>
       <text
         x={mark.x} y={mark.y + 3}
@@ -80,6 +83,7 @@ function compressImage(file) {
 export default function DamageDiagram({
   value = [],
   onChange,
+  readOnly = false,
   // Props opcionales para fotos (solo cuando la recepción ya existe)
   receptionId = null,
   photos = [],          // [{id, damage_id, photo_base64, label}]
@@ -93,6 +97,7 @@ export default function DamageDiagram({
   const pendingDamageId = useRef(null)
 
   const handleSvgClick = (e) => {
+    if (readOnly) return
     const svg = e.currentTarget
     const rect = svg.getBoundingClientRect()
     const vb = svg.viewBox.baseVal
@@ -144,38 +149,42 @@ export default function DamageDiagram({
       />
 
       {/* Selector de tipo de daño */}
-      <div className="flex flex-wrap gap-2">
-        {DAMAGE_TYPES.map(dt => (
-          <button
-            key={dt.id}
-            type="button"
-            onClick={() => setSelectedType(dt.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition ${
-              selectedType === dt.id ? 'border-2' : 'border border-border text-muted hover:text-ink'
-            }`}
-            style={selectedType === dt.id ? { borderColor: dt.color, color: dt.color, background: dt.bg } : {}}
-          >
-            <span className="font-mono font-bold text-sm" style={{ color: dt.color }}>{dt.symbol}</span>
-            {dt.label}
-          </button>
-        ))}
-      </div>
+      {!readOnly && (
+        <>
+          <div className="flex flex-wrap gap-2">
+            {DAMAGE_TYPES.map(dt => (
+              <button
+                key={dt.id}
+                type="button"
+                onClick={() => setSelectedType(dt.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition ${
+                  selectedType === dt.id ? 'border-2' : 'border border-border text-muted hover:text-ink'
+                }`}
+                style={selectedType === dt.id ? { borderColor: dt.color, color: dt.color, background: dt.bg } : {}}
+              >
+                <span className="font-mono font-bold text-sm" style={{ color: dt.color }}>{dt.symbol}</span>
+                {dt.label}
+              </button>
+            ))}
+          </div>
 
-      <p className="text-xs text-muted">
-        Haz clic sobre el vehículo para marcar daños. Clic sobre un marcador para eliminarlo.
-      </p>
+          <p className="text-xs text-muted">
+            Haz clic sobre el vehículo para marcar daños. Clic sobre un marcador para eliminarlo.
+          </p>
+        </>
+      )}
 
       {/* Diagrama */}
       <div className="flex justify-center">
         <svg
           viewBox="0 0 200 380"
-          className="w-full max-w-[220px] cursor-crosshair select-none"
+          className={`w-full max-w-[220px] select-none ${readOnly ? '' : 'cursor-crosshair'}`}
           style={{ touchAction: 'none' }}
           onClick={handleSvgClick}
         >
           <CarSVG />
           {value.map(mark => (
-            <DamageMarker key={mark.id} mark={mark} onRemove={removeMarker} />
+            <DamageMarker key={mark.id} mark={mark} onRemove={removeMarker} readOnly={readOnly} />
           ))}
         </svg>
       </div>
@@ -185,13 +194,15 @@ export default function DamageDiagram({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold text-muted uppercase tracking-wide">Daños registrados</p>
-            <button
-              type="button"
-              onClick={() => { onChange([]); photos.forEach(p => onRemovePhoto?.(p.id)) }}
-              className="text-xs text-muted hover:text-danger transition"
-            >
-              Limpiar todo
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => { onChange([]); photos.forEach(p => onRemovePhoto?.(p.id)) }}
+                className="text-xs text-muted hover:text-danger transition"
+              >
+                Limpiar todo
+              </button>
+            )}
           </div>
 
           {value.map((mark, idx) => {
@@ -212,7 +223,7 @@ export default function DamageDiagram({
                     <span className="text-xs text-muted">#{idx + 1}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    {receptionId ? (
+                    {receptionId && !readOnly ? (
                       <button
                         type="button"
                         onClick={() => openPhotoPicker(mark.id)}
@@ -222,16 +233,18 @@ export default function DamageDiagram({
                         <Camera className="w-3.5 h-3.5" />
                         {isUploading ? 'Subiendo…' : 'Foto'}
                       </button>
-                    ) : (
+                    ) : !readOnly ? (
                       <span className="text-xs text-muted italic">Guarda para añadir fotos</span>
+                    ) : null}
+                    {!readOnly && (
+                      <button
+                        type="button"
+                        onClick={() => removeMarker(mark.id)}
+                        className="p-1 rounded-md text-muted hover:text-danger hover:bg-red-50 transition"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => removeMarker(mark.id)}
-                      className="p-1 rounded-md text-muted hover:text-danger hover:bg-red-50 transition"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
                   </div>
                 </div>
 

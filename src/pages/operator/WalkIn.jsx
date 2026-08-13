@@ -136,15 +136,8 @@ export default function WalkIn() {
             <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-green-200">
               <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
               <p className="text-sm text-green-800">
-                Credenciales enviadas a <strong>{createdResult.owner_email}</strong>
+                Correo de contacto registrado: <strong>{createdResult.owner_email}</strong>
               </p>
-            </div>
-          )}
-          {createdResult.is_new_client && (
-            <div className="bg-white border border-green-200 rounded-lg px-4 py-3 text-left space-y-1">
-              <p className="text-xs text-muted font-semibold uppercase tracking-wide">Credenciales del cliente</p>
-              <p className="text-sm text-ink">Usuario: <span className="font-mono font-bold">{createdResult.owner_email?.split('@')[0] ?? '—'}</span></p>
-              <p className="text-xs text-muted">Contraseña inicial: número de documento</p>
             </div>
           )}
           <button
@@ -339,7 +332,7 @@ export default function WalkIn() {
                 <Field label="Email *" error={!form.email && submitError ? '' : undefined}>
                   <input value={form.email} onChange={e => setField('email', e.target.value)}
                     type="email" required placeholder="juan@correo.com" className={inp} />
-                  <p className="mt-1 text-xs text-muted">Se enviarán las credenciales de acceso al portal</p>
+                  <p className="mt-1 text-xs text-muted">Se usará para enviarle recordatorios y comunicaciones del CDA</p>
                 </Field>
               </div>
             </div>

@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
+import { getRoleHome } from '../auth/roleHome'
 
 const schema = z.object({
   username: z.string().min(1, 'Ingresa tu usuario'),
@@ -26,9 +27,7 @@ export default function Login() {
     try {
       const user = await login(data)
       if (user.must_change_password) { navigate('/cambiar-contrasena'); return }
-      if (user.role === 'customer') navigate('/cliente')
-      else if (['supervisor', 'admin'].includes(user.role)) navigate('/admin-panel')
-      else navigate('/operacion')
+      navigate(getRoleHome(user.role))
     } catch (err) {
       setApiError(err.response?.data?.detail ?? 'Credenciales incorrectas')
     }
@@ -51,15 +50,15 @@ export default function Login() {
             <img src="/logo_blanco.png" alt="Checkar" className="h-24 w-auto" />
           </div>
           <h1 className="text-white text-3xl font-bold leading-tight mb-4">
-            Tu inspección<br />técnico-mecánica<br />en línea.
+            Gestión operativa<br />del CDA,<br />sin papeleo.
           </h1>
           <p className="text-white/60 text-sm leading-relaxed">
-            Agenda, rastrea y descarga tus certificados de revisión
-            sin hacer filas. Todo desde tu teléfono.
+            Recepción, inspección y reportes de la Revisión Técnico Mecánica
+            y de Emisiones Contaminantes, todo en un solo lugar.
           </p>
 
           <div className="mt-10 space-y-4">
-            {['Agenda citas desde cualquier lugar', 'Seguimiento en tiempo real', 'Certificados digitales'].map(f => (
+            {['Recepción digital del FR-25', 'Turnos y seguimiento en tiempo real', 'Reportes y campañas de recordatorio'].map(f => (
               <div key={f} className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
                 <span className="text-white/80 text-sm">{f}</span>
@@ -83,7 +82,7 @@ export default function Login() {
           </div>
 
           <h2 className="text-2xl font-bold text-ink mb-1">Bienvenido</h2>
-          <p className="text-ink-2 text-sm mb-8">Ingresa a tu portal de revisiones</p>
+          <p className="text-ink-2 text-sm mb-8">Ingresa con tu usuario del CDA</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
@@ -132,13 +131,6 @@ export default function Login() {
               {isSubmitting ? 'Ingresando...' : 'Iniciar sesión'}
             </button>
           </form>
-
-          <p className="mt-6 text-center text-sm text-ink-2">
-            ¿No tienes cuenta?{' '}
-            <Link to="/registro" className="text-accent font-semibold hover:underline">
-              Regístrate
-            </Link>
-          </p>
         </div>
       </div>
     </div>

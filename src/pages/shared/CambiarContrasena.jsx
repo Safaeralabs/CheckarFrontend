@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { KeyRound } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
+import { getRoleHome } from '../../auth/roleHome'
 import * as authApi from '../../api/auth'
 
 const inp = "w-full px-4 py-3 rounded-lg border border-border bg-canvas text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-ink"
@@ -33,10 +34,7 @@ export default function CambiarContrasena() {
       rotateToken(data.token)
       updateUser({ ...user, must_change_password: false })
 
-      // Redirigir al portal correspondiente
-      if (user.role === 'customer') navigate('/cliente', { replace: true })
-      else if (['supervisor', 'admin'].includes(user.role)) navigate('/admin-panel', { replace: true })
-      else navigate('/operacion', { replace: true })
+      navigate(getRoleHome(user.role), { replace: true })
     } catch (err) {
       const d = err.response?.data
       setError(typeof d === 'object' ? Object.values(d).flat().join(' ') : 'Error al cambiar la contraseña.')

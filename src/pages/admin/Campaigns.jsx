@@ -1,8 +1,33 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Mail, MessageSquare, Megaphone, Plus, Send, Users, X } from 'lucide-react'
+import { Download, Mail, MessageSquare, Megaphone, Plus, Send, Users, X } from 'lucide-react'
 import api from '../../api/client'
+
+// ── Plantilla de carga externa ────────────────────────────────────────────
+// Para clientes que aún no están registrados en el sistema (ej: base de
+// vencimientos de RTM que ya maneja el CDA por fuera). Columnas mínimas
+// para poder contactarlos e invitarlos a acercarse a pagar.
+const TEMPLATE_HEADERS = ['nombre', 'email', 'telefono', 'placa', 'concepto', 'valor', 'fecha_vencimiento']
+const TEMPLATE_EXAMPLE = [
+  'Juan Pérez', 'juan.perez@correo.com', '3001234567', 'ABC123',
+  'Revisión Técnico Mecánica', '180000', '2026-09-15',
+]
+
+function downloadCampaignTemplate() {
+  const csvEscape = (v) => /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v
+  const rows = [TEMPLATE_HEADERS, TEMPLATE_EXAMPLE].map(r => r.map(csvEscape).join(','))
+  const csv = '﻿' + rows.join('\r\n') // BOM para que Excel reconozca tildes/ñ
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'plantilla_campana_checkar.csv'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
 
 const inp = "w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition placeholder:text-muted text-ink"
 const sel = `${inp} cursor-pointer`
@@ -194,14 +219,28 @@ export default function Campaigns() {
           </h1>
           <p className="text-ink-2 text-sm">Envíos masivos de email y SMS a clientes</p>
         </div>
-        <button
-          onClick={() => setShowNew(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-brand text-white text-sm font-semibold hover:opacity-90 transition flex-shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          Nueva campaña
-        </button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={downloadCampaignTemplate}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-ink-2 text-sm font-semibold hover:bg-canvas hover:text-ink transition"
+            title="Plantilla para cargar contactos que aún no están registrados en el sistema (ej: base de vencimientos)"
+          >
+            <Download className="w-4 h-4" />
+            Descargar plantilla
+          </button>
+          <button
+            onClick={() => setShowNew(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-brand text-white text-sm font-semibold hover:opacity-90 transition"
+          >
+            <Plus className="w-4 h-4" />
+            Nueva campaña
+          </button>
+        </div>
       </div>
+
+      <p className="text-xs text-muted mb-5 -mt-4">
+        La carga de esta plantilla para enviar campañas a contactos externos (no registrados) todavía no está disponible — por ahora la plantilla sirve para preparar la base. Avisame cuando quieras que agregue la carga.
+      </p>
 
       <div className="bg-surface rounded-xl border border-border overflow-hidden">
         {isLoading ? (
