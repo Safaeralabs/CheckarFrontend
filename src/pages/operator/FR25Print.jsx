@@ -139,8 +139,7 @@ export default function FR25Print() {
 
   const st = {
     page: { background: '#fff', color: '#1e293b', fontFamily: 'Arial, sans-serif', fontSize: 11,
-            maxWidth: 800, margin: '0 auto', padding: '20px 28px' },
-    grid3: { display: 'grid', gridTemplateColumns: '1.6fr 1.3fr 1fr' },
+            maxWidth: 800, margin: '0 auto', padding: '20px 16px' },
     printBtn: { position: 'fixed', bottom: 24, right: 24, display: 'flex', alignItems: 'center', gap: 8,
                 padding: '10px 20px', borderRadius: 10, background: '#0ea5e9', color: '#fff',
                 border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700, zIndex: 999 },
@@ -151,10 +150,25 @@ export default function FR25Print() {
   return (
     <>
       <style>{`
+        /* En pantalla (mobile/desktop) las grillas de 3-5 columnas pensadas
+           para papel se apilan para que el texto no se aplaste. Al imprimir
+           (o en pantallas anchas) vuelven al layout original del formato. */
+        .fr25-g3, .fr25-g-clase, .fr25-g-esquema { display: grid; grid-template-columns: 1fr; }
+        .fr25-g-inv { display: grid; grid-template-columns: repeat(2, 1fr); }
+        @media screen and (min-width: 700px) {
+          .fr25-g3        { grid-template-columns: 1.6fr 1.3fr 1fr; }
+          .fr25-g-clase   { grid-template-columns: 2fr 1fr 1fr; }
+          .fr25-g-inv     { grid-template-columns: repeat(5, 1fr); }
+          .fr25-g-esquema { grid-template-columns: 1fr 1fr 1.3fr; }
+        }
         @media print {
           .no-print { display: none !important; }
           body { margin: 0; }
           .fr25-page-break { page-break-before: always; }
+          .fr25-g3        { grid-template-columns: 1.6fr 1.3fr 1fr !important; }
+          .fr25-g-clase   { grid-template-columns: 2fr 1fr 1fr !important; }
+          .fr25-g-inv     { grid-template-columns: repeat(5, 1fr) !important; }
+          .fr25-g-esquema { grid-template-columns: 1fr 1fr 1.3fr !important; }
         }
       `}</style>
 
@@ -164,7 +178,7 @@ export default function FR25Print() {
 
       <div style={st.page}>
         {/* ── Encabezado ── */}
-        <div style={{ ...st.grid3, border: '1px solid #94a3b8', borderBottom: 'none' }}>
+        <div className="fr25-g3" style={{ border: '1px solid #94a3b8', borderBottom: 'none' }}>
           <div style={{ padding: '8px 12px', borderRight: '1px solid #94a3b8' }}>
             <div style={{ fontSize: 22, fontWeight: 900, color: '#0ea5e9', letterSpacing: -1 }}>checkar</div>
             <div style={{ fontSize: 8.5, color: '#64748b' }}>Centro de Diagnóstico Automotor</div>
@@ -191,7 +205,7 @@ export default function FR25Print() {
         </div>
 
         {/* ── Datos del cliente ── */}
-        <div style={st.grid3}>
+        <div className="fr25-g3">
           <Cell label="Nombre Cliente">
             {apt?.customer_detail ? `${apt.customer_detail.first_name} ${apt.customer_detail.last_name}` : '—'}
           </Cell>
@@ -202,14 +216,14 @@ export default function FR25Print() {
           </Cell>
           <Cell label="Fecha">{formatDate(rec?.arrival_time ?? rec?.created_at)}</Cell>
         </div>
-        <div style={{ ...st.grid3, borderTop: 'none' }}>
+        <div className="fr25-g3" style={{ borderTop: 'none' }}>
           <Cell label="Dirección" style={{ borderTop: 'none' }}>{apt?.customer_detail?.address || '—'}</Cell>
           <Cell label="Teléfono" style={{ borderTop: 'none' }}>{apt?.customer_detail?.phone || '—'}</Cell>
           <Cell label="Placa" style={{ borderTop: 'none' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, letterSpacing: 1 }}>{vehicle?.plate}</span>
           </Cell>
         </div>
-        <div style={{ ...st.grid3, borderTop: 'none' }}>
+        <div className="fr25-g3" style={{ borderTop: 'none' }}>
           <Cell label="E-mail" style={{ borderTop: 'none' }}>{apt?.customer_detail?.email || '—'}</Cell>
           <Cell label="Tipo de servicio" style={{ borderTop: 'none' }}>
             <div><CheckOpt label="Enseñanza" checked={svc === 'teaching'} /><CheckOpt label="Público" checked={svc === 'public'} /></div>
@@ -223,7 +237,7 @@ export default function FR25Print() {
         </div>
 
         {/* ── Clase / Combustible / Vidrios / Blindaje ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', borderTop: 'none' }}>
+        <div className="fr25-g-clase" style={{ borderTop: 'none' }}>
           <Cell label="Clase / Combustible" style={{ borderTop: 'none' }}>
             <div>
               <CheckOpt label="Motocicleta" checked={cls === 'motocicleta'} />
@@ -251,19 +265,19 @@ export default function FR25Print() {
         </div>
 
         {/* ── Inventario ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', borderTop: 'none' }}>
+        <div className="fr25-g-inv" style={{ borderTop: 'none' }}>
           {invItemsRow1.map(([label, value]) => (
             <Cell key={label} label={label} style={{ borderTop: 'none' }}>{value || '—'}</Cell>
           ))}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', borderTop: 'none' }}>
+        <div className="fr25-g-inv" style={{ borderTop: 'none' }}>
           {invItemsRow2.map(([label, value]) => (
             <Cell key={label} label={label} style={{ borderTop: 'none' }}>{value || '—'}</Cell>
           ))}
         </div>
 
         {/* ── Esquema de daños + Kilometraje + Tipo de revisión ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.3fr', borderTop: 'none' }}>
+        <div className="fr25-g-esquema" style={{ borderTop: 'none' }}>
           <Cell label="Simbología de daños" style={{ borderTop: 'none' }}>
             {Object.keys(DAMAGE_LABELS).map(t => (
               <div key={t} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9 }}>
