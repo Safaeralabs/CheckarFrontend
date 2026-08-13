@@ -14,6 +14,15 @@ function Plate({ value }) {
   return <span className="font-mono font-bold text-brand tracking-widest">{value?.toUpperCase()}</span>
 }
 
+function TurnBadge({ value }) {
+  if (!value) return <span className="text-xs text-muted">—</span>
+  return (
+    <span className="inline-flex px-2 py-0.5 rounded-md bg-accent-soft text-accent text-xs font-bold font-mono tracking-wide">
+      {value}
+    </span>
+  )
+}
+
 const TODAY = new Date().toISOString().slice(0, 10)
 
 export default function OperatorDashboard() {
@@ -95,7 +104,8 @@ export default function OperatorDashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-xs text-muted font-semibold uppercase tracking-wide">
-                  <th className="text-left px-5 py-3">Placa</th>
+                  <th className="text-left px-5 py-3">Turno</th>
+                  <th className="text-left px-4 py-3">Placa</th>
                   <th className="text-left px-4 py-3">Cliente</th>
                   <th className="text-left px-4 py-3">Servicio</th>
                   <th className="text-left px-4 py-3">Hora</th>
@@ -107,6 +117,9 @@ export default function OperatorDashboard() {
                 {appointments.map(apt => (
                   <tr key={apt.id} className="hover:bg-canvas transition-colors">
                     <td className="px-5 py-4">
+                      <TurnBadge value={apt.turn_number} />
+                    </td>
+                    <td className="px-4 py-4">
                       <Plate value={apt.vehicle_detail?.plate ?? '—'} />
                     </td>
                     <td className="px-4 py-4 text-ink">
@@ -133,7 +146,10 @@ export default function OperatorDashboard() {
             {appointments.map(apt => (
               <div key={apt.id} className="p-4 space-y-2">
                 <div className="flex items-center justify-between">
-                  <Plate value={apt.vehicle_detail?.plate ?? '—'} />
+                  <div className="flex items-center gap-2">
+                    <TurnBadge value={apt.turn_number} />
+                    <Plate value={apt.vehicle_detail?.plate ?? '—'} />
+                  </div>
                   <StatusBadge status={apt.status} />
                 </div>
                 <p className="text-sm text-ink">{apt.customer_detail?.first_name} {apt.customer_detail?.last_name}</p>
