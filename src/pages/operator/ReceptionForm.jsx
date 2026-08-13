@@ -9,7 +9,6 @@ import api from '../../api/client'
 import { addDamagePhoto, removeDamagePhoto } from '../../api/operations'
 import SignaturePad from '../../components/SignaturePad'
 import DamageDiagram from '../../components/DamageDiagram'
-import { useAuth } from '../../auth/AuthContext'
 
 const schema = z.object({
   // Inspección
@@ -104,10 +103,6 @@ const FUEL_LABELS = { gasoline: 'Gasolina', diesel: 'Diésel', hybrid: 'Híbrido
 export default function ReceptionForm() {
   const { appointmentId } = useParams()
   const qc = useQueryClient()
-  const { user } = useAuth()
-  // El rol "operador" es quien entrega el vehículo al cliente: puede ver la
-  // recepción pero no modificarla. Solo inspector/supervisor/admin la editan.
-  const readOnly = user?.role === 'operator'
 
   const officerSigRef = useRef(null)
   const clientSigRef = useRef(null)
@@ -295,12 +290,6 @@ export default function ReceptionForm() {
         )}
       </div>
 
-      {readOnly && (
-        <div className="mb-6 px-4 py-3 rounded-lg bg-info-soft border border-info/30 text-info text-sm font-medium">
-          Modo de solo lectura — como operador podés ver la recepción, pero solo un inspector, supervisor o admin puede modificarla.
-        </div>
-      )}
-
       <form
         onSubmit={handleSubmit(d => {
           if (officerSigRef.current?.isEmpty() || clientSigRef.current?.isEmpty()) {
@@ -312,7 +301,6 @@ export default function ReceptionForm() {
         })}
         className="space-y-8"
       >
-      <fieldset disabled={readOnly} className="space-y-8 border-0 p-0 m-0 min-w-0">
 
         {/* Tipo de inspección */}
         <section className="bg-surface rounded-xl border border-border p-5">
@@ -444,7 +432,6 @@ export default function ReceptionForm() {
           <DamageDiagram
             value={damageAnnotations}
             onChange={setDamageAnnotations}
-            readOnly={readOnly}
             receptionId={existingReception?.id ?? null}
             photos={existingReception?.damage_photos ?? []}
             onAddPhoto={async (damageId, photoBase64) => {
@@ -544,8 +531,8 @@ export default function ReceptionForm() {
             El funcionario y el cliente firman juntos, en el mismo momento de la recepción.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <SignaturePad ref={officerSigRef} label="Funcionario del CDA" disabled={readOnly} />
-            <SignaturePad ref={clientSigRef} label="Cliente (Firma Autorizada)" disabled={readOnly} />
+            <SignaturePad ref={officerSigRef} label="Funcionario del CDA" />
+            <SignaturePad ref={clientSigRef} label="Cliente (Firma Autorizada)" />
           </div>
         </section>
 
@@ -568,7 +555,6 @@ export default function ReceptionForm() {
         >
           {saveMut.isPending ? 'Guardando...' : existingReception ? 'Guardar cambios' : 'Guardar recepción'}
         </button>
-      </fieldset>
       </form>
 
       {/* Una vez firmada por ambas partes, se habilita el paso a inspección */}
