@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import api from '../../api/client'
 import { STATUS_MAP, formatDateTime } from '../../lib/utils'
+import { PRE_EVAL_ITEMS, VISUAL_ITEMS, MECH_ITEMS } from '../../lib/inspectionItems'
 
 /* ─── Constantes del proceso ─────────────────────────────────────── */
 
@@ -17,43 +18,6 @@ const STEPS = [
   { n: 4, label: 'Pruebas mecánicas',   icon: Wind },
   { n: 5, label: 'Fotografías',         icon: Camera },
   { n: 6, label: 'Resultado',           icon: CheckCircle },
-]
-
-const PRE_EVAL_ITEMS = [
-  { key: 'soat_vigente',          label: 'SOAT vigente',                              critical: true,  hasNA: false },
-  { key: 'licencia_transito',     label: 'Presentó licencia de tránsito',              critical: true,  hasNA: false },
-  { key: 'identificacion',        label: 'Presentó identificación',                   critical: false, hasNA: false },
-  { key: 'vehiculo_limpio',       label: 'Vehículo limpio',                           critical: false, hasNA: false },
-  { key: 'vehiculo_vacio',        label: 'Vehículo vacío',                            critical: false, hasNA: false },
-  { key: 'dispositivos_seguridad',label: 'Dispositivos de seguridad deshabilitados',  critical: false, hasNA: false },
-  { key: 'sin_tapacubos',         label: 'Inexistencia de tapacubos',                 critical: false, hasNA: true  },
-  { key: 'preparado_inspeccion',  label: 'Vehículo preparado para la inspección',     critical: false, hasNA: false },
-]
-
-const VISUAL_ITEMS = [
-  { key: 'carroceria_danos',       category: 'carroceria',   label: 'Sin daños visibles en carrocería' },
-  { key: 'carroceria_oxidacion',   category: 'carroceria',   label: 'Sin oxidación severa' },
-  { key: 'luces_frontales',        category: 'luces',        label: 'Luces frontales funcionando' },
-  { key: 'luces_traseras',         category: 'luces',        label: 'Luces traseras y stop funcionando' },
-  { key: 'luces_direccionales',    category: 'luces',        label: 'Direccionales (4 vías) funcionando' },
-  { key: 'llantas_desgaste',       category: 'llantas',      label: 'Desgaste uniforme y dentro del límite' },
-  { key: 'vidrios_parabrisas',     category: 'vidrios',      label: 'Parabrisas sin fisuras ni daños críticos' },
-  { key: 'vidrios_laterales',      category: 'vidrios',      label: 'Vidrios laterales en buen estado' },
-  { key: 'cinturones',             category: 'seguridad',    label: 'Cinturones de seguridad funcionando' },
-  { key: 'espejos_retrovisores',   category: 'seguridad',    label: 'Espejos retrovisores completos y ajustados' },
-]
-
-const MECH_ITEMS = [
-  { key: 'motor_ruidos',           category: 'motor',        label: 'Sin ruidos anormales en motor' },
-  { key: 'motor_humo',             category: 'motor',        label: 'Sin emisión de humo visible anormal' },
-  { key: 'motor_fugas',            category: 'motor',        label: 'Sin fugas de aceite o refrigerante' },
-  { key: 'frenos_pedal',           category: 'frenos',       label: 'Pedal de freno firme y sin juego excesivo' },
-  { key: 'frenos_eficiencia',      category: 'frenos',       label: 'Frenado eficiente en línea recta' },
-  { key: 'frenos_mano',            category: 'frenos',       label: 'Freno de mano / estacionamiento funcional' },
-  { key: 'direccion_juego',        category: 'dirección',    label: 'Sin juego excesivo en volante' },
-  { key: 'suspension_estado',      category: 'suspensión',   label: 'Suspensión sin holguras anormales' },
-  { key: 'transmision_cambios',    category: 'transmisión',  label: 'Cambios de marcha sin anomalías' },
-  { key: 'escape_emisiones',       category: 'escape',       label: 'Sistema de escape sin fugas' },
 ]
 
 const STATUS_TRANSITIONS = {
@@ -761,14 +725,23 @@ function ClosedView({ inspection }) {
           </p>
         )}
         <p className="text-xs text-muted mt-4">Finalizada: {formatDateTime(inspection?.completed_at)}</p>
-        {inspection?.appointment && (
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
           <Link
-            to={`/operacion/entrega/${inspection.appointment}`}
-            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand hover:bg-brand-light text-white text-sm font-semibold transition"
+            to={`/operacion/inspecciones/${inspection.id}/reporte`}
+            target="_blank"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border text-ink text-sm font-semibold hover:bg-canvas transition"
           >
-            <Truck className="w-4 h-4" /> Entregar vehículo
+            Ver reporte
           </Link>
-        )}
+          {inspection?.appointment && (
+            <Link
+              to={`/operacion/entrega/${inspection.appointment}`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand hover:bg-brand-light text-white text-sm font-semibold transition"
+            >
+              <Truck className="w-4 h-4" /> Entregar vehículo
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   )
