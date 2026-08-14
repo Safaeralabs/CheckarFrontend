@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { AlertCircle, ArrowLeft, ArrowRight, Car, CheckCircle, Mail, Search, UserPlus } from 'lucide-react'
 import api from '../../api/client'
+import { STATUS_MAP, formatDateTime } from '../../lib/utils'
 
 // ── Helpers de estilo ─────────────────────────────────────────────────────────
 const inp  = "w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition placeholder:text-muted text-ink"
@@ -17,6 +18,11 @@ function Field({ label, children, error }) {
       {error && <p className="mt-1 text-xs text-danger">{error}</p>}
     </div>
   )
+}
+
+function StatusBadge({ status }) {
+  const s = STATUS_MAP[status] ?? { label: status, color: 'bg-gray-100 text-gray-600 border-gray-200' }
+  return <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${s.color}`}>{s.label}</span>
 }
 
 const VEHICLE_TYPE_LABELS = { light: 'Liviano', heavy: 'Pesado', motorcycle: 'Motocicleta' }
@@ -111,6 +117,16 @@ export default function WalkIn() {
     setPhase('search'); setPlate(''); setFoundVehicle(null)
     setSearchError(''); setSubmitError(''); setInspectionType('official')
   }
+
+  // ── Historial de inspecciones de la placa encontrada ─────────────────────
+  const { data: historyData, isLoading: loadingHistory } = useQuery({
+    queryKey: ['inspection-history', foundVehicle?.plate],
+    queryFn: () => api.get('inspections/records/', {
+      params: { search: foundVehicle.plate, ordering: '-started_at' },
+    }).then(r => r.data),
+    enabled: phase === 'found' && !!foundVehicle?.plate,
+  })
+  const historyItems = historyData?.results ?? historyData ?? []
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -282,6 +298,41 @@ export default function WalkIn() {
                 <option value="pre_technical">Pre-técnica</option>
               </select>
             </div>
+          </div>
+
+          <div className="bg-surface rounded-xl border border-border p-5">
+            <h2 className="text-xs font-bold text-muted uppercase tracking-widest mb-4">Historial de inspecciones</h2>
+            {loadingHistory ? (
+              <div className="flex justify-center py-6">
+                <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : historyItems.length === 0 ? (
+              <p className="text-sm text-muted">Sin inspecciones previas registradas para esta placa.</p>
+            ) : (
+              <div className="divide-y divide-border -mx-5 -mb-1">
+                {historyItems.map(ins => (
+                  <div key={ins.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={ins.status} />
+                        <span className="text-xs text-ink-2">
+                          {ins.inspection_type === 'official' ? 'Oficial' : 'Pre-técnica'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted">{formatDateTime(ins.started_at)}</p>
+                    </div>
+                    <a
+                      href={`/operacion/inspecciones/${ins.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-semibold text-accent hover:underline flex-shrink-0"
+                    >
+                      reporte
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {submitError && (
