@@ -322,7 +322,7 @@ export default function WalkIn() {
                       <p className="text-xs text-muted">{formatDateTime(ins.started_at)}</p>
                     </div>
                     <a
-                      href={`/operacion/inspecciones/${ins.id}`}
+                      href={`/operacion/inspecciones/${ins.id}/reporte`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs font-semibold text-accent hover:underline flex-shrink-0"
