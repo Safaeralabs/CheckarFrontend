@@ -216,11 +216,17 @@ export default function InspectionWizard() {
           }
         }
         // Avanzar: pending → documents_validated → pre_evaluated
+        // (solo si el estado actual todavía no llegó a pre_evaluated; si el
+        // usuario vuelve a este paso después de haber avanzado, no se reintenta
+        // la transición para no chocar con INSPECTION_TRANSITIONS del backend)
         if (inspection?.status === 'pending') {
           await api.post(`inspections/records/${id}/advance_status/`, { next_status: 'documents_validated' })
+          await api.post(`inspections/records/${id}/advance_status/`, { next_status: 'pre_evaluated' })
+          await qc.invalidateQueries({ queryKey: ['inspection', id] })
+        } else if (inspection?.status === 'documents_validated') {
+          await api.post(`inspections/records/${id}/advance_status/`, { next_status: 'pre_evaluated' })
+          await qc.invalidateQueries({ queryKey: ['inspection', id] })
         }
-        await api.post(`inspections/records/${id}/advance_status/`, { next_status: 'pre_evaluated' })
-        await qc.invalidateQueries({ queryKey: ['inspection', id] })
       }
 
       if (step === 2) {
