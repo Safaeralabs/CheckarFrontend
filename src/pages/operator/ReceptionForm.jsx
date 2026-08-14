@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Car, CheckCircle, Printer } from 'lucide-react'
 import api from '../../api/client'
 import { addDamagePhoto, removeDamagePhoto } from '../../api/operations'
@@ -106,6 +107,7 @@ export default function ReceptionForm() {
 
   const officerSigRef = useRef(null)
   const clientSigRef = useRef(null)
+  const inspectionLinkRef = useRef(null)
   const [damageAnnotations, setDamageAnnotations] = useState([])
   const [sigError, setSigError] = useState('')
 
@@ -130,6 +132,18 @@ export default function ReceptionForm() {
     }),
     enabled: !!appointmentId,
   })
+
+  // Al quedar firmada por ambas partes (justo después de guardar, no en la
+  // carga inicial de una recepción ya firmada) lleva la vista al mensaje de
+  // "Ir a la inspección"
+  const prevSigStatusRef = useRef(undefined)
+  useEffect(() => {
+    const status = existingReception?.signature_status
+    if (status === 'fully_signed' && prevSigStatusRef.current && prevSigStatusRef.current !== 'fully_signed') {
+      inspectionLinkRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+    prevSigStatusRef.current = status
+  }, [existingReception?.signature_status])
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
@@ -254,6 +268,24 @@ export default function ReceptionForm() {
 
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
+      {/* Overlay de "procesando" mientras se guarda la recepción */}
+      <AnimatePresence>
+        {saveMut.isPending && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-canvas/70 backdrop-blur-sm"
+          >
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-10 h-10 border-[3px] border-accent border-t-transparent rounded-full animate-spin" />
+              <p className="text-sm font-semibold text-ink">Procesando información...</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Link to="/operacion" className="flex items-center gap-2 text-sm text-muted hover:text-ink transition mb-6">
         <ArrowLeft className="w-4 h-4" /> Cola del día
       </Link>
@@ -558,18 +590,26 @@ export default function ReceptionForm() {
       </form>
 
       {/* Una vez firmada por ambas partes, se habilita el paso a inspección */}
-      {existingReception?.signature_status === 'fully_signed' && (
-        <div className="mt-6 bg-surface rounded-xl border border-border p-5 space-y-3">
-          <div className="flex items-start gap-3 p-4 rounded-lg bg-green-50 border border-green-200">
-            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-green-800">Recepción firmada por ambas partes</p>
-              <p className="text-xs text-green-700 mt-0.5">La inspección ya puede comenzar.</p>
+      <AnimatePresence>
+        {existingReception?.signature_status === 'fully_signed' && (
+          <motion.div
+            ref={inspectionLinkRef}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="mt-6 bg-surface rounded-xl border border-border p-5 space-y-3"
+          >
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-green-50 border border-green-200">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-green-800">Recepción firmada por ambas partes</p>
+                <p className="text-xs text-green-700 mt-0.5">La inspección ya puede comenzar.</p>
+              </div>
             </div>
-          </div>
-          <InspectionLink appointmentId={appointmentId} />
-        </div>
-      )}
+            <InspectionLink appointmentId={appointmentId} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

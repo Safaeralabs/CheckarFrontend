@@ -373,9 +373,14 @@ export default function FR25Print() {
           </div>
 
           <div style={{ display: 'flex', gap: 40, marginTop: 20 }}>
-            <div style={{ flex: 1, borderTop: '1px solid #1e293b', paddingTop: 4, fontSize: 9, textAlign: 'center' }}>ACEPTO</div>
-            <div style={{ flex: 1, borderTop: '1px solid #1e293b', paddingTop: 4, fontSize: 9, textAlign: 'center' }}>RECIBÍ CONFORME</div>
+            <SigBox label="Acepto" dataUrl={rec?.signature_delivery} />
+            <SigBox label="Recibí conforme" dataUrl={rec?.signature_delivery} />
           </div>
+          {rec?.delivered_at && (
+            <div style={{ textAlign: 'center', fontSize: 8.5, color: '#64748b', marginTop: 4 }}>
+              Fecha de entrega: {formatDate(rec.delivered_at)}
+            </div>
+          )}
         </div>
       </div>
     </>
