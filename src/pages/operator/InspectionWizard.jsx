@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft, ArrowRight, Camera, CheckCircle, Circle,
-  ClipboardCheck, Gauge, ShieldCheck, ThumbsDown, ThumbsUp, Wind, XCircle,
+  ClipboardCheck, Gauge, ShieldCheck, ThumbsDown, ThumbsUp, Truck, Wind, XCircle,
 } from 'lucide-react'
 import api from '../../api/client'
 import { STATUS_MAP, formatDateTime } from '../../lib/utils'
@@ -755,6 +755,14 @@ function ClosedView({ inspection }) {
           </p>
         )}
         <p className="text-xs text-muted mt-4">Finalizada: {formatDateTime(inspection?.completed_at)}</p>
+        {inspection?.appointment && (
+          <Link
+            to={`/operacion/entrega/${inspection.appointment}`}
+            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand hover:bg-brand-light text-white text-sm font-semibold transition"
+          >
+            <Truck className="w-4 h-4" /> Entregar vehículo
+          </Link>
+        )}
       </div>
     </div>
   )

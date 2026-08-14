@@ -8,6 +8,7 @@ import OperatorDashboard from './pages/operator/OperatorDashboard'
 import ReceptionForm from './pages/operator/ReceptionForm'
 import InspectionList from './pages/operator/InspectionList'
 import InspectionWizard from './pages/operator/InspectionWizard'
+import VehicleDelivery from './pages/operator/VehicleDelivery'
 import WalkIn from './pages/operator/WalkIn'
 import FR25Print from './pages/operator/FR25Print'
 import AdminLayout from './pages/admin/AdminLayout'
@@ -53,6 +54,7 @@ export default function App() {
         <Route path="recepcion/:appointmentId" element={<ReceptionForm />} />
         <Route path="inspecciones"             element={<InspectionList />} />
         <Route path="inspecciones/:id"         element={<InspectionWizard />} />
+        <Route path="entrega/:appointmentId"   element={<VehicleDelivery />} />
         <Route path="fr25/:receptionId"        element={<FR25Print />} />
         <Route path="perfil"                   element={<Perfil />} />
       </Route>
